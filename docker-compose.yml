@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: glm-skills-hub-db
+    environment:
+      POSTGRES_USER: glm_skills
+      POSTGRES_PASSWORD: glm_skills_password
+      POSTGRES_DB: glm_skills_hub
+    ports:
+      - "15432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U glm_skills"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
