@@ -24,12 +24,6 @@ const nextConfig = {
       },
     ],
   },
-
-  // 国际化配置
-  i18n: {
-    locales: ['zh', 'en'],
-    defaultLocale: 'zh',
-  },
 }
 
 module.exports = nextConfig
