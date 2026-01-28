@@ -1,0 +1,312 @@
+// Prisma Schema for GLM Skills Hub
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 核心模型 ====================
+
+/// Skill (技能)
+model Skill {
+  id              String   @id @default(cuid())
+  name            String
+  nameZh          String?  // 中文名
+  slug            String   @unique
+  description     String   @db.Text
+  descriptionZh   String?  @db.Text // 中文描述
+
+  // GitHub 信息
+  repository      String   // GitHub 仓库完整路径，如 "anthropics/skills"
+  author          String
+  authorId        String?  // GitHub 用户 ID
+  stars           Int      @default(0)
+  forks           Int      @default(0)
+  openIssues      Int      @default(0)
+  lastCommit      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  syncedAt        DateTime @default(now()) // 最后同步时间
+
+  // 分类和标签
+  categories      Category[]       @relation("SkillCategories")
+  tags            Tag[]            @relation("SkillTags")
+
+  // 关联数据
+  translations    Translation[]
+  reviews         Review[]
+  favorites       Favorite[]
+  usageLogs       UsageLog[]
+
+  // 统计数据
+  viewCount       Int      @default(0)
+  usageCount      Int      @default(0)
+  rating          Float    @default(0)
+  ratingCount     Int      @default(0)
+
+  // 安装信息
+  installCommand  String?
+  skillMdContent  String?  @db.Text
+  readmeContent   String?  @db.Text
+  marketplaceJson Json?
+
+  // 状态标记
+  isOfficial      Boolean  @default(false) // 是否官方技能
+  isVerified      Boolean  @default(false) // 是否已验证
+  isActive        Boolean  @default(true)  // 是否启用
+  featured        Boolean  @default(false) // 是否精选
+
+  @@index([stars])
+  @@index([createdAt])
+  @@index([rating])
+  @@index([slug])
+  @@index([isOfficial])
+  @@index([featured])
+  @@map("skills")
+}
+
+/// Category (分类)
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  nameZh      String   // 中文名称
+  slug        String   @unique
+  icon        String   // 图标 emoji 或图标名
+  color       String?  // 主题色
+  description String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+
+  skills      Skill[]  @relation("SkillCategories")
+
+  @@index([order])
+  @@map("categories")
+}
+
+/// Tag (标签)
+model Tag {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  nameZh String  // 中文名称
+  slug   String  @unique
+  type   TagType
+  skills Skill[] @relation("SkillTags")
+
+  @@index([type])
+  @@map("tags")
+}
+
+enum TagType {
+  TECH_STACK    // 技术栈标签，如 React, Vue
+  USE_CASE      // 使用场景标签，如 #代码审查
+  LANGUAGE      // 编程语言标签
+  FRAMEWORK     // 框架标签
+}
+
+// ==================== 用户模型 ====================
+
+/// User (用户)
+model User {
+  id           String    @id @default(cuid())
+  githubId     String    @unique
+  name         String?
+  email        String?
+  avatar       String?
+  bio          String?   @db.Text
+
+  // 积分系统
+  credits      Int       @default(100)
+
+  // 时间戳
+  createdAt    DateTime  @default(now())
+  lastSignInAt DateTime  @updatedAt
+
+  // 关联数据
+  favorites    Favorite[]
+  reviews      Review[]
+  translations Translation[]
+  contributions Contribution[]
+  usageLogs    UsageLog[]
+
+  @@map("users")
+}
+
+/// Favorite (收藏)
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  skillId   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+  @@map("favorites")
+}
+
+/// Review (评论/评分)
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5 星
+  content   String?  @db.Text
+  userId    String
+  skillId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@index([skillId])
+  @@index([rating])
+  @@index([userId])
+  @@map("reviews")
+}
+
+// ==================== 翻译模型 ====================
+
+/// Translation (翻译贡献)
+model Translation {
+  id         String             @id @default(cuid())
+  skillId    String
+  field      String             // 翻译的字段名，如 "description", "usage"
+  contentEn  String   @db.Text  // 原文
+  contentZh  String   @db.Text  // 译文
+  userId     String
+  status     TranslationStatus @default(PENDING)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([skillId, field])
+  @@index([userId])
+  @@index([status])
+  @@map("translations")
+}
+
+enum TranslationStatus {
+  PENDING   // 待审核
+  APPROVED  // 已采纳
+  REJECTED  // 已拒绝
+}
+
+// ==================== 贡献模型 ====================
+
+/// Contribution (用户贡献)
+model Contribution {
+  id        String           @id @default(cuid())
+  userId    String
+  type      ContributionType
+  title     String
+  content   String?          @db.Text
+  skillId   String?
+  status    ContributionStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+  reviewedAt DateTime?
+  reviewedBy String?         // 审核人 ID
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@map("contributions")
+}
+
+enum ContributionType {
+  SUBMIT_SKILL     // 提交新技能
+  SUBMIT_TRANSLATION // 提交翻译
+  REPORT_ISSUE     // 报告问题
+  SUGGEST_IMPROVEMENT // 建议改进
+}
+
+enum ContributionStatus {
+  PENDING    // 待审核
+  APPROVED   // 已采纳
+  REJECTED   // 已拒绝
+}
+
+// ==================== 使用记录 ====================
+
+/// UsageLog (使用记录)
+model UsageLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  skillId    String
+  action     UsageAction
+  creditsCost Int     @default(0)
+  metadata   Json?    // 额外信息，如执行结果、错误信息等
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([skillId])
+  @@index([createdAt])
+  @@map("usage_logs")
+}
+
+enum UsageAction {
+  VIEW        // 查看详情
+  TRIAL       // 在线试用
+  INSTALL     // 点击安装
+  FAVORITE    // 收藏
+}
+
+// ==================== 积分记录 ====================
+
+/// CreditLog (积分记录)
+model CreditLog {
+  id          String      @id @default(cuid())
+  userId      String
+  amount      Int         // 变化数量，正数为增加，负数为减少
+  reason      CreditReason
+  description String?
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("credit_logs")
+}
+
+enum CreditReason {
+  REGISTER        // 注册奖励
+  DAILY_CHECKIN  // 每日签到
+  SUBMIT_SKILL   // 提交技能
+  TRANSLATE      // 贡献翻译
+  INVITE         // 邀请用户
+  TRIAL_USE      // 试用消耗
+  AI_SEARCH      // AI搜索消耗
+  MANUAL_ADJUST  // 手动调整
+}
+
+// ==================== 爬虫配置 ====================
+
+/// ScraperConfig (爬虫配置)
+model ScraperConfig {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  source      String   // 数据源，如 GitHub 仓库路径
+  type        String   // 类型，如 "awesome-list", "org-repo"
+  config      Json     // 配置参数
+  isActive    Boolean  @default(true)
+  lastSyncAt  DateTime?
+  syncCount   Int      @default(0)
+  errorCount  Int      @default(0)
+  lastError   String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("scraper_configs")
+}
