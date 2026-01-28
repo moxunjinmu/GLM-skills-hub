@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Star, GitFork, ExternalLink } from 'lucide-react'
 
