@@ -105,4 +105,22 @@ export const githubApi = {
       throw error
     }
   },
+
+  /**
+   * 列出组织的所有仓库
+   */
+  async listOrgRepos(org: string, perPage = 100, page = 1) {
+    try {
+      const { data } = await github.rest.repos.listForOrg({
+        org,
+        type: 'public',
+        per_page: perPage,
+        page,
+      })
+      return data
+    } catch (error) {
+      console.error(`Failed to list repos for org ${org}:`, error)
+      throw error
+    }
+  },
 }

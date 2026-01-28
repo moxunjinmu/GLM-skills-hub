@@ -83,6 +83,8 @@ export async function scrapeRepository(
       usageCount: 0,
       rating: 0,
       ratingCount: 0,
+      categories: [],
+      tags: [],
     }
 
     return skillData
@@ -185,22 +187,18 @@ export async function scrapeOrgRepos(org: string): Promise<SkillInput[]> {
   const skills: SkillInput[] = []
 
   try {
-    // 获取组织的所有仓库
-    const repos = await github.rest.repos.listForOrg({
-      org,
-      type: 'public',
-      per_page: 100,
-    })
+    // 获取组织的所有仓库 (使用 githubApi)
+    const repos = await githubApi.listOrgRepos(org)
 
     // 筛选包含 SKILL.md 的仓库
-    const skillRepos = repos.data.filter((repo) => {
+    const skillRepos = repos.filter((repo: any) => {
       // 可以根据名称、描述等条件筛选
       return repo.name.includes('skill') || repo.description?.includes('skill')
     })
 
     // 并发爬取
     const results = await Promise.allSettled(
-      skillRepos.map((repo) => scrapeRepository(org, repo.name))
+      skillRepos.map((repo: any) => scrapeRepository(org, repo.name))
     )
 
     for (const result of results) {

@@ -21,6 +21,7 @@ interface SearchResult {
   forks: number
   rating: number
   ratingCount: number
+  viewCount: number
   isOfficial: boolean
   featured: boolean
   categories: Array<{ nameZh: string; slug: string; icon: string }>

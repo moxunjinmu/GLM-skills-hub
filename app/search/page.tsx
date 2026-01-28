@@ -104,6 +104,7 @@ async function getSuggestedSkills() {
     },
     include: {
       categories: true,
+      tags: true,
     },
     take: 6,
     orderBy: {

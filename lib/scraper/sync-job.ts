@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db'
+import { githubApi } from '@/lib/github'
 import {
   scrapeRepository,
   scrapeAwesomeList,

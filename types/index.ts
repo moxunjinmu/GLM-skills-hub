@@ -156,9 +156,41 @@ export interface SearchParams extends PaginationParams {
 }
 
 export interface SearchResult {
-  skills: Skill[]
+  id: string
+  name: string
+  nameZh: string | null
+  slug: string
+  description: string
+  descriptionZh: string | null
+  repository: string
+  author: string
+  stars: number
+  forks: number
+  openIssues: number
+  lastCommit: Date | null
+  createdAt: Date
+  updatedAt: Date
+  syncedAt: Date
+  categories: Category[]
+  tags: Tag[]
+  viewCount: number
+  usageCount: number
+  rating: number
+  ratingCount: number
+  installCommand: string | null
+  skillMdContent: string | null
+  readmeContent: string | null
+  marketplaceJson: Record<string, unknown> | null
+  isOfficial: boolean
+  isVerified: boolean
+  isActive: boolean
+  featured: boolean
+}
+
+export interface SearchResponse {
+  skills: SearchResult[]
   suggestions: string[]
-  pagination: PaginationResult<Skill>
+  pagination: PaginationResult<SearchResult>
 }
 
 // ==================== Skill 解析类型 ====================
