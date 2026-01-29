@@ -39,6 +39,7 @@ npm install
 # 配置环境变量
 cp .env.example .env
 # 编辑 .env 文件，填写必要配置
+# 详细配置说明请参考: [docs/ENV_SETUP.md](./docs/ENV_SETUP.md)
 
 # 初始化数据库
 npm run db:push

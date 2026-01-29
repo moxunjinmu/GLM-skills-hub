@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
 
+  // Docker 部署需要 standalone 输出模式
+  output: 'standalone',
+
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',

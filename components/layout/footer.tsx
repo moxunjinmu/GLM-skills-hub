@@ -1,6 +1,10 @@
 import Link from 'next/link'
 import { Github, Heart } from 'lucide-react'
 
+// 从环境变量获取 GitHub 组织，如果没有配置则使用默认值
+const GITHUB_ORG = process.env.NEXT_PUBLIC_GITHUB_ORG || 'your-org'
+const GITHUB_REPO_URL = `https://github.com/${GITHUB_ORG}/glm-skills-hub`
+
 export function Footer() {
   return (
     <footer className="border-t bg-background">
@@ -107,10 +111,11 @@ export function Footer() {
           </p>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
             <a
-              href="https://github.com/your-org/glm-skills-hub"
+              href={GITHUB_REPO_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-primary"
+              aria-label="GitHub 仓库"
             >
               <Github className="h-5 w-5" />
             </a>
