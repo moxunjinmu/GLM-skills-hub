@@ -122,6 +122,92 @@ docker run -d \
 
 **用途**：访问 GitHub API、同步 Skills 数据
 
+---
+
+### GitHub OAuth App (GitHub 登录功能)
+
+**用途**：用户通过 GitHub 账号登录
+
+#### 📋 创建 GitHub OAuth App 详细步骤
+
+**步骤 1: 进入设置页面**
+
+访问：https://github.com/settings/developers
+
+**步骤 2: 创建新的 OAuth App**
+
+1. 点击左侧菜单的 **"OAuth Apps"**
+2. 点击右上角 **"New OAuth App"** 按钮
+
+**步骤 3: 填写应用信息**
+
+| 字段 | 开发环境 | 生产环境 |
+|------|----------|----------|
+| **Application name** | `GLM Skills Hub (Dev)` | `GLM Skills Hub` |
+| **Homepage URL** | `http://localhost:3000` | `https://your-domain.com` |
+| **Application description** | `AI Agent Skills 中文聚合平台` | `AI Agent Skills 中文聚合平台` |
+| **Authorization callback URL** | `http://localhost:3000/api/auth/callback/github` | `https://your-domain.com/api/auth/callback/github` |
+
+> **重要**：回调 URL 必须完全匹配，包括协议和端口
+
+**步骤 4: 获取凭据**
+
+创建成功后，你会看到：
+- **Client ID**: 一串 36 字符的字符串（如：`Iv1.1234567890abcdef`）
+- **Client Secret**: 点击 "Generate a new client secret" 按钮生成
+
+**示例**：
+```
+GITHUB_CLIENT_ID=Iv1.1a2b3c4d5e6f7g8h
+GITHUB_CLIENT_SECRET=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+#### ⚠️ 重要提示
+
+1. **Client Secret 只显示一次**，请立即复制保存
+2. **开发环境和生产环境需要分别创建** OAuth App
+3. **回调 URL 必须匹配**，否则登录会报错
+4. 如果是公开的 OAuth App，Client ID 可以公开，但 Client Secret 必须保密
+
+#### 🔄 更新回调 URL
+
+如果部署环境改变，需要更新 OAuth App 的回调 URL：
+1. 进入 OAuth App 设置页面
+2. 点击应用名称进入详情
+3. 点击 "Update authorization callback URL"
+4. 修改回调 URL 并保存
+
+#### 🧪 测试配置
+
+配置完成后，可以访问以下地址测试：
+```
+http://localhost:3000/api/auth/signin
+```
+
+点击 "GitHub" 登录按钮，应该能跳转到 GitHub 授权页面。
+
+### 生成 NEXTAUTH_SECRET
+
+**重要**：`NEXTAUTH_SECRET` 用于加密会话令牌，必须是一个随机字符串。
+
+**生成方法**：
+
+```bash
+# 方法 1: 使用 OpenSSL (推荐)
+openssl rand -base64 32
+
+# 方法 2: 使用 Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+# 方法 3: 使用 Python
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+**示例生成的 secret**（请使用你自己生成的）：
+```
+J8itay4kWhYDKcVblhGMG8GHPxU+v71GmlfgpvJfX3Y=
+```
+
 ## ⚙️ 功能降级说明
 
 本项目设计了**智能降级机制**，即使没有配置某些密钥，核心功能仍可正常使用：
@@ -130,8 +216,13 @@ docker run -d \
 |------|-------------|----------|
 | 关键词搜索 | ✅ 正常使用 | 无 |
 | AI 语义搜索 | 🔄 降级为关键词搜索 | `ZHIPU_API_KEY` |
+| GitHub 登录 | ❌ 不可用 | `GITHUB_CLIENT_ID` + `GITHUB_CLIENT_SECRET` + `NEXTAUTH_SECRET` |
 | GitHub 同步 | 🔄 跳过同步 | `GITHUB_TOKEN` |
 | 在线试用 | 🔄 显示不可用 | `ANTHROPIC_API_KEY` |
+
+**注意**：
+- **开发环境**：`NEXTAUTH_SECRET` 会自动生成，无需配置
+- **生产环境**：`NEXTAUTH_SECRET` **必须配置**，否则应用无法启动
 
 **示例**：
 ```javascript
