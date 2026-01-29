@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth/config'
 
 /**
  * POST /api/contributions/skills
@@ -10,7 +9,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 export async function POST(request: NextRequest) {
   try {
     // 获取用户会话（可选）
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     const userId = session?.user?.id
 
     // 解析请求体
