@@ -47,3 +47,7 @@ prisma/migrations/
 # Logs
 logs/
 *.log
+
+# Temporary files
+nul
+*.tmp
