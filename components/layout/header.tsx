@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { LoginButton } from '@/components/auth/login-button'
 import { Github, Search } from 'lucide-react'
 
 export function Header() {
@@ -50,13 +51,9 @@ export function Header() {
 
           <ThemeToggle />
 
-          {/* 用户菜单 - 待实现 */}
+          {/* 用户登录 */}
           <div className="hidden md:block">
-            <Link href="/user">
-              <button className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-                登录
-              </button>
-            </Link>
+            <LoginButton />
           </div>
         </div>
       </div>

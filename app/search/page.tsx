@@ -2,10 +2,10 @@ import { prisma } from '@/lib/db'
 import { SearchPage } from '@/components/search/search-page'
 
 interface SearchPageProps {
-  searchParams: {
+  searchParams: Promise<{
     q?: string
     page?: string
-  }
+  }>
 }
 
 /**

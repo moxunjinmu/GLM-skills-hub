@@ -5,19 +5,19 @@ import { SkillsSidebar } from '@/components/skill/skills-sidebar'
 import { SkillsGrid } from '@/components/skill/skills-grid'
 
 interface SkillsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string
     sort?: string
     category?: string
     tag?: string
     search?: string
-  }
+  }>
 }
 
 /**
  * 获取 Skills 列表
  */
-async function getSkills(params: SkillsPageProps['searchParams']) {
+async function getSkills(params: Awaited<SkillsPageProps['searchParams']>) {
   const page = parseInt(params.page || '1')
   const limit = 12
   const skip = (page - 1) * limit
@@ -121,8 +121,7 @@ async function getTags() {
  * Skills 列表页
  */
 export default async function SkillsPage({ searchParams }: SkillsPageProps) {
-  // Next.js 15 requires await searchParams
-  const awaitedParams = await Promise.resolve(searchParams)
+  const awaitedParams = await searchParams
 
   const [{ skills, pagination }, categories, tags] = await Promise.all([
     getSkills(awaitedParams),
