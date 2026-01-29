@@ -3,7 +3,7 @@
  * 解析 SKILL.md 文件并提取元数据
  */
 
-import { ParsedSkill, SkillMetadata } from '@/types'
+import { ParsedSkill, SkillMetadata } from '../../types/index'
 
 /**
  * 解析 SKILL.md 文件
@@ -152,9 +152,16 @@ export function parseMarketplaceJson(content: string): Record<string, unknown> |
 
 /**
  * 提取 install command
+ * @param repository 仓库路径，如 "anthropics/skills"
+ * @param subdirectory 可选的子目录，如 "algorithmic-art"
  */
-export function extractInstallCommand(repository: string): string {
-  // 从仓库路径生成标准的安装命令
+export function extractInstallCommand(repository: string, subdirectory?: string): string {
+  if (subdirectory) {
+    // 多技能仓库，指定子目录
+    // 例如: "anthropics/skills" + "algorithmic-art" -> "npx skills add anthropics/skills --skill=algorithmic-art"
+    return `npx skills add ${repository} --skill=${subdirectory}`
+  }
+  // 单技能仓库
   // 例如: "anthropics/skills" -> "npx skills add anthropics/skills"
   return `npx skills add ${repository}`
 }

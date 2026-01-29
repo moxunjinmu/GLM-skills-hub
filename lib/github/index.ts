@@ -123,4 +123,72 @@ export const githubApi = {
       throw error
     }
   },
+
+  /**
+   * 列出目录内容
+   * 返回目录中的文件和子目录列表
+   */
+  async listDirectory(owner: string, repo: string, path: string) {
+    try {
+      const { data } = await github.rest.repos.getContent({
+        owner,
+        repo,
+        path,
+      })
+      if (Array.isArray(data)) {
+        return data.map((item: any) => ({
+          name: item.name,
+          type: item.type, // 'file' | 'dir' | 'symlink'
+          path: item.path,
+          size: item.size,
+        }))
+      }
+      return []
+    } catch (error) {
+      console.error(`Failed to list directory ${path} from ${owner}/${repo}:`, error)
+      return []
+    }
+  },
+
+  /**
+   * 在目录中递归查找文件
+   * @returns 找到的文件路径，未找到返回 null
+   */
+  async findFileInDirectory(
+    owner: string,
+    repo: string,
+    dirPath: string,
+    fileName: string,
+    maxDepth = 3
+  ): Promise<string | null> {
+    try {
+      const items = await this.listDirectory(owner, repo, dirPath)
+
+      for (const item of items) {
+        // 找到目标文件
+        if (item.type === 'file' && item.name === fileName) {
+          return item.path
+        }
+
+        // 递归搜索子目录
+        if (item.type === 'dir' && maxDepth > 0) {
+          const found = await this.findFileInDirectory(
+            owner,
+            repo,
+            item.path,
+            fileName,
+            maxDepth - 1
+          )
+          if (found) {
+            return found
+          }
+        }
+      }
+
+      return null
+    } catch (error) {
+      console.error(`Failed to find file ${fileName} in ${dirPath}:`, error)
+      return null
+    }
+  },
 }

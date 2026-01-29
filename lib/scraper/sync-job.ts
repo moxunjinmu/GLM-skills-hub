@@ -3,10 +3,11 @@
  * 定时从 GitHub 同步 Skills 数据
  */
 
-import { prisma } from '@/lib/db'
-import { githubApi } from '@/lib/github'
+import { prisma } from '../db'
+import { githubApi } from '../github/index'
 import {
   scrapeRepository,
+  scrapeMultiSkillRepository,
   scrapeAwesomeList,
   searchSkillRepos,
 } from './github-scraper'
@@ -15,9 +16,14 @@ import {
  * 同步配置
  */
 const SYNC_CONFIG = {
-  // 官方仓库
-  officialRepos: [
+  // 官方多技能仓库（从 skills/ 目录爬取所有技能）
+  multiSkillRepos: [
     { owner: 'anthropics', repo: 'skills' },
+  ],
+
+  // 官方单技能仓库
+  officialRepos: [
+    // 单个技能的仓库
   ],
 
   // Awesome 列表
@@ -47,8 +53,19 @@ export async function runSyncJob() {
   }
 
   try {
-    // 1. 同步官方仓库
-    console.log('Syncing official repositories...')
+    // 1. 同步官方多技能仓库
+    console.log('Syncing official multi-skill repositories...')
+    for (const repo of SYNC_CONFIG.multiSkillRepos) {
+      const { skills, stats: scrapeStats } = await scrapeMultiSkillRepository(repo.owner, repo.repo, { verbose: true })
+      for (const skill of skills) {
+        const result = await upsertSkill(skill)
+        stats[result] = (stats[result] || 0) + 1
+      }
+      console.log(`  ${repo.owner}/${repo.repo}: ${scrapeStats.success} skills found, ${scrapeStats.failed} failed`)
+    }
+
+    // 2. 同步官方单技能仓库
+    console.log('Syncing official single-skill repositories...')
     for (const repo of SYNC_CONFIG.officialRepos) {
       const result = await syncRepository(repo.owner, repo.repo)
       if (result) {
@@ -56,14 +73,15 @@ export async function runSyncJob() {
       }
     }
 
-    // 2. 同步 Awesome 列表
+    // 3. 同步 Awesome 列表
     console.log('Syncing awesome lists...')
     for (const list of SYNC_CONFIG.awesomeLists) {
-      const skills = await scrapeAwesomeList(list.owner, list.repo)
+      const { skills, stats: scrapeStats } = await scrapeAwesomeList(list.owner, list.repo, { verbose: false })
       for (const skill of skills) {
         const result = await upsertSkill(skill)
         stats[result] = (stats[result] || 0) + 1
       }
+      console.log(`  ${list.owner}/${list.repo}: ${scrapeStats.success} skills found, ${scrapeStats.failed} failed`)
     }
 
     // 3. 搜索新的 Skills
@@ -118,12 +136,15 @@ async function upsertSkill(skillData: any): Promise<'added' | 'updated'> {
     where: { slug: skillData.slug },
   })
 
+  // 清理数据，移除不能直接设置的关联字段
+  const { categories, tags, ...cleanData } = skillData
+
   if (existing) {
     // 更新
     await prisma.skill.update({
       where: { id: existing.id },
       data: {
-        ...skillData,
+        ...cleanData,
         id: existing.id, // 保持原 ID
         syncedAt: new Date(),
       },
@@ -133,7 +154,7 @@ async function upsertSkill(skillData: any): Promise<'added' | 'updated'> {
     // 新增
     await prisma.skill.create({
       data: {
-        ...skillData,
+        ...cleanData,
         syncedAt: new Date(),
       },
     })
