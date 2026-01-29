@@ -13,31 +13,38 @@ import {
 } from './github-scraper'
 
 /**
+ * 仓库配置类型
+ */
+interface RepoConfig {
+  owner: string
+  repo: string
+}
+
+/**
  * 同步配置
  */
 const SYNC_CONFIG = {
-  // 官方多技能仓库（从 skills/ 目录爬取所有技能）
+  // 多技能仓库（从 skills/ 目录爬取所有技能）
   multiSkillRepos: [
-    { owner: 'anthropics', repo: 'skills' },
-  ],
+    { owner: 'anthropics', repo: 'skills' },                    // 官方技能 (16个)
+    { owner: 'sickn33', repo: 'antigravity-awesome-skills' },   // 社区技能 (548+个)
+    { owner: 'ComposioHQ', repo: 'awesome-claude-skills' },     // Composio 技能
+    { owner: 'JimLiu', repo: 'baoyu-skills' },                  // 宝玉技能
+    { owner: 'cexll', repo: 'myclaude' },                       // cexll 技能
+  ] as RepoConfig[],
 
   // 官方单技能仓库
-  officialRepos: [
-    // 单个技能的仓库
-  ],
+  officialRepos: [] as RepoConfig[],
 
-  // Awesome 列表
-  awesomeLists: [
-    { owner: 'ComposioHQ', repo: 'awesome-claude-skills' },
-    { owner: 'sickn33', repo: 'antigravity-awesome-skills' },
-  ],
+  // Awesome 列表（单技能仓库列表）
+  awesomeLists: [] as RepoConfig[],
 
   // 搜索查询
   searchQueries: [
     'SKILL.md language:JavaScript stars:>10',
     'SKILL.md language:TypeScript stars:>10',
     'SKILL.md language:Python stars:>10',
-  ],
+  ] as string[],
 }
 
 /**
