@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db'
+import { githubApi } from '@/lib/github'
 import {
   scrapeRepository,
   scrapeAwesomeList,
@@ -12,6 +13,14 @@ import {
 
 /**
  * 同步配置
+ *
+ * 数据来源：
+ * - https://github.com/anthropics/skills (官方)
+ * - https://github.com/ComposioHQ/awesome-claude-skills (Awesome 列表)
+ * - https://github.com/sickn33/antigravity-awesome-skills (Awesome 列表)
+ * - https://github.com/JimLiu/baoyu-skills (社区)
+ * - https://github.com/cexll/myclaude (社区)
+ * - https://skills.sh/ (官方网站)
  */
 const SYNC_CONFIG = {
   // 官方仓库
@@ -23,6 +32,12 @@ const SYNC_CONFIG = {
   awesomeLists: [
     { owner: 'ComposioHQ', repo: 'awesome-claude-skills' },
     { owner: 'sickn33', repo: 'antigravity-awesome-skills' },
+  ],
+
+  // 社区技能仓库
+  communityRepos: [
+    { owner: 'JimLiu', repo: 'baoyu-skills' },
+    { owner: 'cexll', repo: 'myclaude' },
   ],
 
   // 搜索查询
@@ -65,7 +80,16 @@ export async function runSyncJob() {
       }
     }
 
-    // 3. 搜索新的 Skills
+    // 3. 同步社区仓库
+    console.log('Syncing community repositories...')
+    for (const repo of SYNC_CONFIG.communityRepos) {
+      const result = await syncRepository(repo.owner, repo.repo)
+      if (result) {
+        stats[result] = (stats[result] || 0) + 1
+      }
+    }
+
+    // 4. 搜索新的 Skills
     console.log('Searching for new Skills...')
     for (const query of SYNC_CONFIG.searchQueries) {
       const repos = await searchSkillRepos(query, 50)
@@ -77,7 +101,7 @@ export async function runSyncJob() {
       }
     }
 
-    // 4. 更新已存在的 Skills
+    // 5. 更新已存在的 Skills
     console.log('Updating existing Skills...')
     await updateExistingSkills()
 

@@ -29,8 +29,11 @@ GLM Skills Hub 是一个面向中文开发者的 AI Agent Skills 聚合平台，
 
 - Node.js >= 18
 - PostgreSQL >= 14
+- Docker & Docker Compose（用于本地数据库）
 
 ### 安装
+
+详细的安装步骤请查看 [项目启动 SOP](./docs/SETUP.md)。
 
 ```bash
 # 安装依赖
@@ -40,14 +43,19 @@ npm install
 cp .env.example .env
 # 编辑 .env 文件，填写必要配置
 
+# 启动数据库（Docker）
+docker-compose up -d postgres
+
 # 初始化数据库
-npm run db:push
+npx prisma migrate dev
 
 # 启动开发服务器
 npm run dev
 ```
 
 访问 http://localhost:3000 查看网站。
+
+> 遇到问题？查看 [故障排查指南](./docs/SETUP.md#常见问题排查)
 
 ### 主要命令
 

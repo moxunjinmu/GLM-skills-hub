@@ -3,7 +3,7 @@
  * 用于发现和获取 Skills 仓库信息
  */
 
-import { githubApi } from '@/lib/github'
+import { github, githubApi } from '@/lib/github'
 import { parseSkillMd, extractInstallCommand, generateSlug } from './skill-parser'
 import { SkillInput } from '@/types'
 
@@ -83,6 +83,8 @@ export async function scrapeRepository(
       usageCount: 0,
       rating: 0,
       ratingCount: 0,
+      categories: [], // 待后续分类
+      tags: [], // 待后续标签
     }
 
     return skillData
@@ -167,8 +169,8 @@ export async function searchSkillRepos(
     const results = await githubApi.searchCode(query, perPage)
 
     return results.items
-      .filter((item) => item.repository)
-      .map((item) => ({
+      .filter((item: any) => item?.repository)
+      .map((item: any) => ({
         owner: item.repository.owner.login,
         repo: item.repository.name,
       }))
@@ -193,14 +195,14 @@ export async function scrapeOrgRepos(org: string): Promise<SkillInput[]> {
     })
 
     // 筛选包含 SKILL.md 的仓库
-    const skillRepos = repos.data.filter((repo) => {
+    const skillRepos = repos.data.filter((repo: any) => {
       // 可以根据名称、描述等条件筛选
       return repo.name.includes('skill') || repo.description?.includes('skill')
     })
 
     // 并发爬取
     const results = await Promise.allSettled(
-      skillRepos.map((repo) => scrapeRepository(org, repo.name))
+      skillRepos.map((repo: any) => scrapeRepository(org, repo.name))
     )
 
     for (const result of results) {
