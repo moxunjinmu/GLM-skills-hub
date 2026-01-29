@@ -28,23 +28,55 @@ GLM Skills Hub 是一个面向中文开发者的 AI Agent Skills 聚合平台，
 ### 环境要求
 
 - Node.js >= 18
-- PostgreSQL >= 14
+- Docker Desktop (用于 PostgreSQL 数据库)
 
-### 安装
+### 一键初始化（推荐）
+
+项目提供了自动化初始化脚本，支持 Windows/macOS/Linux：
+
+**Windows:**
+```bash
+npm run setup
+# 或直接运行
+setup.bat
+```
+
+**macOS/Linux:**
+```bash
+npm run setup
+# 或添加执行权限后运行
+chmod +x setup.sh
+./setup.sh
+```
+
+脚本会自动完成以下操作：
+1. 检查 Docker 和 Node.js 环境
+2. 创建 `.env` 配置文件（基于 `.env.example`）
+3. 安装项目依赖
+4. 启动 PostgreSQL 数据库容器
+5. 初始化数据库结构
+6. （可选）导入种子数据
+
+### 手动安装
+
+如果需要手动安装，请按以下步骤操作：
 
 ```bash
-# 安装依赖
+# 1. 安装依赖
 npm install
 
-# 配置环境变量
+# 2. 配置环境变量
 cp .env.example .env
 # 编辑 .env 文件，填写必要配置
 # 详细配置说明请参考: [docs/ENV_SETUP.md](./docs/ENV_SETUP.md)
 
-# 初始化数据库
-npm run db:push
+# 3. 启动 PostgreSQL 数据库（Docker）
+docker-compose up -d postgres
 
-# 启动开发服务器
+# 4. 初始化数据库
+npm run db:init
+
+# 5. 启动开发服务器
 npm run dev
 ```
 

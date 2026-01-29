@@ -6,13 +6,13 @@ import { CategoryHeader } from '@/components/category/category-header'
 import { SkillsGrid } from '@/components/skill/skills-grid'
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     page?: string
     sort?: string
-  }
+  }>
 }
 
 /**
@@ -128,7 +128,8 @@ export async function generateStaticParams() {
  * 生成元数据
  */
 export async function generateMetadata({ params }: CategoryPageProps) {
-  const category = await getCategory(params.slug)
+  const { slug } = await params
+  const category = await getCategory(slug)
 
   if (!category) {
     return {
@@ -149,15 +150,16 @@ export default async function CategoryPage({
   params,
   searchParams,
 }: CategoryPageProps) {
-  const awaitedParams = await Promise.resolve(params)
-  const category = await getCategory(awaitedParams.slug)
+  const { slug } = await params
+  const resolvedSearchParams = await searchParams
+  const category = await getCategory(slug)
 
   if (!category) {
     notFound()
   }
 
   const [{ skills, pagination }, allCategories] = await Promise.all([
-    getCategorySkills(category.id, await Promise.resolve(searchParams)),
+    getCategorySkills(category.id, resolvedSearchParams),
     getAllCategories(),
   ])
 
