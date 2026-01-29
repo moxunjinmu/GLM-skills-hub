@@ -34,12 +34,10 @@ export async function scrapeRepository(
     // 如果没有 SKILL.md，尝试从 skills/ 目录查找
     let finalSkillMdContent = skillMdContent
     if (!skillMdContent) {
-      // 列出 skills/ 目录
-      try {
-        const skillsDirContent = await githubApi.getFileContent(owner, repo, 'skills/')
-        // TODO: 解析目录并找到 SKILL.md 文件
-      } catch {
-        // 忽略错误
+      console.log(`No SKILL.md in root, searching in skills/ directory...`)
+      finalSkillMdContent = await githubApi.findFileInDirectory(owner, repo, 'skills/', 'SKILL.md')
+      if (finalSkillMdContent) {
+        console.log(`Found SKILL.md in skills/ directory`)
       }
     }
 

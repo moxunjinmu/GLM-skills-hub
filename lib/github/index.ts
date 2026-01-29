@@ -105,4 +105,59 @@ export const githubApi = {
       throw error
     }
   },
+
+  /**
+   * 列出目录内容
+   */
+  async listDirectory(owner: string, repo: string, path: string) {
+    try {
+      const { data } = await github.rest.repos.getContent({
+        owner,
+        repo,
+        path,
+      })
+      if (Array.isArray(data)) {
+        return data
+      }
+      return null
+    } catch (error) {
+      console.error(`Failed to list directory ${path} from ${owner}/${repo}:`, error)
+      return null
+    }
+  },
+
+  /**
+   * 递归查找目录中的文件
+   */
+  async findFileInDirectory(
+    owner: string,
+    repo: string,
+    dirPath: string,
+    fileName: string
+  ): Promise<string | null> {
+    try {
+      const items = await this.listDirectory(owner, repo, dirPath)
+      if (!items) return null
+
+      // 先在当前目录查找
+      for (const item of items) {
+        if (item.type === 'file' && item.name === fileName) {
+          return this.getFileContent(owner, repo, item.path)
+        }
+      }
+
+      // 递归查找子目录
+      for (const item of items) {
+        if (item.type === 'dir') {
+          const content = await this.findFileInDirectory(owner, repo, item.path, fileName)
+          if (content) return content
+        }
+      }
+
+      return null
+    } catch (error) {
+      console.error(`Failed to find file ${fileName} in ${dirPath}:`, error)
+      return null
+    }
+  },
 }
