@@ -18,7 +18,8 @@
     "scraper:build": "tsc lib/scraper/sync-job.ts --outDir dist --module commonjs --esModuleInterop --skipLibCheck",
     "scraper": "node dist/lib/scraper/sync-job.js",
     "test": "vitest",
-    "generate:secret": "node scripts/generate-secret.js"
+    "generate:secret": "node scripts/generate-secret.js",
+    "db:vercel:push": "node scripts/push-to-vercel.js"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
