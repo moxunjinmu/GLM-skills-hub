@@ -1,55 +1,81 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Star, GitFork, ExternalLink } from 'lucide-react'
 
-// TODO: 从数据库获取精选 Skills
-const featuredSkills = [
-  {
-    slug: 'vercel-react-best-practices',
-    name: 'vercel-react-best-practices',
-    nameZh: 'Vercel React 最佳实践',
-    description: 'React 和 Next.js 性能优化指南，来自 Vercel 工程团队的最佳实践',
-    repository: 'anthropics/skills',
-    author: 'anthropics',
-    stars: 12500,
-    forks: 1200,
-    categories: ['开发工具'],
-    tags: ['React', 'Next.js'],
-  },
-  {
-    slug: 'frontend-design',
-    name: 'frontend-design',
-    nameZh: '前端设计智能',
-    description: '创建高质量前端界面，支持多种设计风格和 UI 组件',
-    repository: 'anthropics/skills',
-    author: 'anthropics',
-    stars: 8900,
-    forks: 670,
-    categories: ['设计'],
-    tags: ['UI/UX', 'Frontend'],
-  },
-  {
-    slug: 'code-review',
-    name: 'code-review',
-    nameZh: '代码审查',
-    description: '自动化代码审查，检查代码质量、安全漏洞和最佳实践',
-    repository: 'anthropics/skills',
-    author: 'anthropics',
-    stars: 6700,
-    forks: 450,
-    categories: ['开发工具'],
-    tags: ['Review', 'Quality'],
-  },
-]
+interface Tag {
+  name: string
+}
+
+interface Skill {
+  slug: string
+  name: string
+  nameZh: string | null
+  description: string
+  repository: string
+  author: string
+  stars: number
+  forks: number
+  tags: Tag[]
+}
 
 /**
  * 精选 Skills 展示组件
  */
 export function FeaturedSkills() {
+  const [skills, setSkills] = useState<Skill[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchFeaturedSkills() {
+      try {
+        const response = await fetch('/api/skills?featured=true&limit=6')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success) {
+            setSkills(result.data.skills)
+          }
+        }
+      } catch (error) {
+        console.error('获取精选 Skills 失败:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchFeaturedSkills()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="p-6 rounded-lg border bg-card animate-pulse">
+            <div className="h-6 w-32 mb-2 bg-muted rounded"></div>
+            <div className="h-4 w-24 mb-4 bg-muted rounded"></div>
+            <div className="h-16 w-full mb-4 bg-muted rounded"></div>
+            <div className="flex gap-4">
+              <div className="h-4 w-12 bg-muted rounded"></div>
+              <div className="h-4 w-12 bg-muted rounded"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (skills.length === 0) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        暂无精选 Skills
+      </div>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {featuredSkills.map((skill) => (
+      {skills.map((skill) => (
         <Link
           key={skill.slug}
           href={`/skills/${skill.slug}`}
@@ -99,16 +125,18 @@ export function FeaturedSkills() {
           </div>
 
           {/* 标签 */}
-          <div className="flex flex-wrap gap-2 mt-4">
-            {skill.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-1 text-xs bg-muted rounded"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+          {skill.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {skill.tags.slice(0, 3).map((tag) => (
+                <span
+                  key={tag.name}
+                  className="px-2 py-1 text-xs bg-muted rounded"
+                >
+                  {tag.name}
+                </span>
+              ))}
+            </div>
+          )}
         </Link>
       ))}
     </div>

@@ -1,43 +1,68 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-// TODO: 从数据库获取最新 Skills
-const recentSkills = [
-  {
-    slug: 'new-skill-1',
-    name: 'api-debugger',
-    nameZh: 'API 调试器',
-    description: '调试和测试 API 接口的智能工具',
-    repository: 'user/api-debugger',
-    author: 'contributor',
-    createdAt: '2025-01-28',
-  },
-  {
-    slug: 'new-skill-2',
-    name: 'docker-helper',
-    nameZh: 'Docker 助手',
-    description: 'Docker 容器管理和部署辅助',
-    repository: 'user/docker-helper',
-    author: 'contributor2',
-    createdAt: '2025-01-27',
-  },
-  {
-    slug: 'new-skill-3',
-    name: 'test-generator',
-    nameZh: '测试生成器',
-    description: '自动生成单元测试和集成测试',
-    repository: 'user/test-generator',
-    author: 'contributor3',
-    createdAt: '2025-01-26',
-  },
-]
+interface Skill {
+  slug: string
+  name: string
+  nameZh: string | null
+  description: string
+  author: string
+  createdAt: string
+}
 
 /**
  * 最新收录 Skills 组件
  */
 export function RecentSkills() {
+  const [skills, setSkills] = useState<Skill[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchRecentSkills() {
+      try {
+        const response = await fetch('/api/skills?sort=latest&limit=5')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success) {
+            setSkills(result.data.skills)
+          }
+        }
+      } catch (error) {
+        console.error('获取最新 Skills 失败:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRecentSkills()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="p-4 rounded-lg border bg-card animate-pulse">
+            <div className="h-5 w-32 mb-1 bg-muted rounded"></div>
+            <div className="h-4 w-full bg-muted rounded"></div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (skills.length === 0) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        暂无最新收录的 Skills
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
-      {recentSkills.map((skill) => (
+      {skills.map((skill) => (
         <Link
           key={skill.slug}
           href={`/skills/${skill.slug}`}
@@ -50,7 +75,7 @@ export function RecentSkills() {
                   {skill.nameZh || skill.name}
                 </h3>
                 <span className="text-xs text-muted-foreground">
-                  {skill.createdAt}
+                  {new Date(skill.createdAt).toLocaleDateString('zh-CN')}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">
