@@ -68,19 +68,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   events: {
     /**
-     * 在创建新用户时自动设置 githubId
-     * 通过 createUser 事件处理，确保 githubId 在用户创建后立即填充
+     * 当链接新账号时，将 GitHub 账号 ID 同步到 User.githubId
+     * 这个事件在账号链接时触发，可以直接访问 account 对象
      */
-    async createUser({ user }) {
-      // 获取该用户的 GitHub 账号信息
-      const account = await prisma.account.findFirst({
-        where: { userId: user.id },
-      })
-      if (account?.provider === 'github') {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { githubId: account.providerAccountId },
-        })
+    async linkAccount({ account, user }) {
+      if (account?.provider === 'github' && account.providerAccountId) {
+        try {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { githubId: account.providerAccountId },
+          })
+        } catch (error) {
+          console.error('[Auth] linkAccount error:', error)
+        }
       }
     },
   },
