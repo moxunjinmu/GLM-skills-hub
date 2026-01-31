@@ -45,20 +45,6 @@ async function getSkill(slug: string) {
 }
 
 /**
- * 生成静态参数（用于静态生成）
- */
-export async function generateStaticParams() {
-  const skills = await prisma.skill.findMany({
-    select: { slug: true },
-    take: 50,
-  })
-
-  return skills.map((skill) => ({
-    slug: skill.slug,
-  }))
-}
-
-/**
  * 生成元数据
  */
 export async function generateMetadata({ params }: SkillPageProps) {

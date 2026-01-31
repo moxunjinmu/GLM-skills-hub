@@ -114,20 +114,6 @@ async function getAllCategories() {
 }
 
 /**
- * 生成静态参数
- */
-export async function generateStaticParams() {
-  const categories = await prisma.category.findMany({
-    where: { isActive: true },
-    select: { slug: true },
-  })
-
-  return categories.map((category) => ({
-    slug: category.slug,
-  }))
-}
-
-/**
  * 生成元数据
  */
 export async function generateMetadata({ params }: CategoryPageProps) {
