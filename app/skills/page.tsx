@@ -4,6 +4,9 @@ import { SkillsHeader } from '@/components/skill/skills-header'
 import { SkillsSidebar } from '@/components/skill/skills-sidebar'
 import { SkillsGrid } from '@/components/skill/skills-grid'
 
+// 禁用静态生成，使用动态渲染
+export const dynamic = 'force-dynamic'
+
 interface SkillsPageProps {
   searchParams: Promise<{
     page?: string

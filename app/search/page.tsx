@@ -1,6 +1,9 @@
 import { prisma } from '@/lib/db'
 import { SearchPage } from '@/components/search/search-page'
 
+// 禁用静态生成，使用动态渲染
+export const dynamic = 'force-dynamic'
+
 interface SearchPageProps {
   searchParams: Promise<{
     q?: string

@@ -1,6 +1,9 @@
 import { prisma } from '@/lib/db'
 import { CategoriesList } from '@/components/categories/categories-list'
 
+// 禁用静态生成，使用动态渲染
+export const dynamic = 'force-dynamic'
+
 /**
  * 分类列表首页
  */

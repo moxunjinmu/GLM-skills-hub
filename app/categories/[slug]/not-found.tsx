@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 
+// 禁用静态生成，使用动态渲染
+export const dynamic = 'force-dynamic'
+
 interface CategoryPageProps {
   params: {
     slug: string
