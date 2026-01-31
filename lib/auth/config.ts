@@ -19,6 +19,14 @@ function getAuthSecret(): string {
     return crypto.randomBytes(32).toString('base64')
   }
 
+  // 构建阶段（如 Vercel 构建时）使用临时 secret，运行时必须配置
+  // 检测是否在构建阶段：没有 VERCEL_URL 或其他运行时特有的环境变量
+  const isBuildTime = !process.env.VERCEL_URL && !process.env.DATABASE_URL
+  if (isBuildTime) {
+    console.warn('[Auth] 构建阶段未配置 NEXTAUTH_SECRET，使用临时 secret（运行时必须配置）')
+    return crypto.randomBytes(32).toString('base64')
+  }
+
   throw new Error(
     '生产环境必须配置 NEXTAUTH_SECRET 环境变量。' +
     '可以使用 openssl rand -base64 32 生成一个随机字符串。'
