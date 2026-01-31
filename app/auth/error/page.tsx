@@ -1,11 +1,16 @@
 import Link from 'next/link'
 
-export default function AuthErrorPage({
+export const dynamic = 'force-dynamic'
+
+type AuthErrorPageProps = {
+  searchParams: Promise<{ error?: string }>
+}
+
+export default async function AuthErrorPage({
   searchParams,
-}: {
-  searchParams: { error?: string }
-}) {
-  const error = searchParams.error
+}: AuthErrorPageProps) {
+  const resolvedParams = await searchParams
+  const error = resolvedParams?.error
 
   const errorMessages: Record<string, { title: string; description: string }> = {
     Configuration: {
@@ -61,19 +66,12 @@ export default function AuthErrorPage({
 
           {/* 操作按钮 */}
           <div className="space-y-3">
-            <form
-              action={async () => {
-                'use server'
-                await fetch('/api/auth/signout', { method: 'POST' })
-              }}
+            <Link
+              href="/auth/signin"
+              className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
             >
-              <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-              >
-                返回登录页面
-              </button>
-            </form>
+              返回登录页面
+            </Link>
 
             <Link
               href="/"

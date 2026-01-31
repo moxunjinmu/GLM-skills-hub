@@ -1,13 +1,18 @@
 import { signIn } from '@/lib/auth/config'
 import { Github } from 'lucide-react'
 
-export default function SignInPage({
+export const dynamic = 'force-dynamic'
+
+type SignInPageProps = {
+  searchParams: Promise<{ error?: string; callbackUrl?: string }>
+}
+
+export default async function SignInPage({
   searchParams,
-}: {
-  searchParams: { error?: string; callbackUrl?: string }
-}) {
-  const error = searchParams.error
-  const callbackUrl = searchParams.callbackUrl || '/'
+}: SignInPageProps) {
+  const resolvedParams = await searchParams
+  const error = resolvedParams.error
+  const callbackUrl = resolvedParams.callbackUrl || '/'
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4">
