@@ -137,6 +137,7 @@ model User {
   translations Translation[]
   contributions Contribution[]
   usageLogs    UsageLog[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -340,6 +341,35 @@ enum CreditReason {
   TRIAL_USE      // 试用消耗
   AI_SEARCH      // AI搜索消耗
   MANUAL_ADJUST  // 手动调整
+}
+
+// ==================== 通知系统 ====================
+
+/// Notification (通知)
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  content   String   @db.Text
+  read      Boolean  @default(false)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  REVIEW_APPROVED    // 审核通过
+  REVIEW_REJECTED    // 审核拒绝
+  COMMENT_REPLY      // 评论回复
+  CREDIT_EARNED      // 获得积分
+  SYSTEM_NOTICE      // 系统通知
 }
 
 // ==================== 爬虫配置 ====================
