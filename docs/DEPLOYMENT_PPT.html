@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLM Skills Hub 部署指南</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/dark.css">
+  <style>
+    body {
+      background: #1a1a2e;
+    }
+    .reveal h1 { color: #7aa2f7; font-size: 48px; }
+    .reveal h2 { color: #bb9af7; font-size: 36px; }
+    .reveal h3 { color: #9aa5ce; font-size: 28px; }
+    .reveal strong { color: #7dcfff; }
+    .reveal code {
+      background: #16161e;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 20px;
+    }
+    .reveal pre {
+      background: #16161e;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 18px;
+    }
+    .reveal table {
+      margin: auto;
+    }
+    .reveal th, .reveal td {
+      padding: 8px 16px;
+      border: 1px solid #414868;
+    }
+    .reveal th {
+      background: #24283b;
+    }
+    .emoji { font-size: 48px; }
+    .center { text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- 封面 -->
+      <section class="center">
+        <h1>GLM Skills Hub</h1>
+        <h2>部署指南</h2>
+      </section>
+
+      <!-- 目录 -->
+      <section>
+        <h2>📋 目录</h2>
+        <ol>
+          <li>部署前准备</li>
+          <li>Vercel 部署</li>
+          <li>环境配置</li>
+          <li>数据库设置</li>
+          <li>数据同步</li>
+          <li>常见问题</li>
+        </ol>
+      </section>
+
+      <!-- 部署前准备 -->
+      <section>
+        <h2>🎯 部署前准备</h2>
+        <h3>环境要求</h3>
+        <ul>
+          <li>✅ Node.js >= 18</li>
+          <li>✅ PostgreSQL >= 14</li>
+          <li>✅ GitHub 账号</li>
+          <li>✅ Vercel 账号</li>
+          <li>✅ GitHub Token</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>📦 准备 GitHub 仓库</h2>
+        <pre><code>git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/用户名/glm-skills-hub.git
+git push -u origin main</code></pre>
+      </section>
+
+      <!-- Vercel 部署 -->
+      <section>
+        <h2>🚀 Vercel 部署</h2>
+        <h3>部署步骤</h3>
+        <ol>
+          <li>访问 vercel.com</li>
+          <li>点击 "Add New Project"</li>
+          <li>导入 GitHub 仓库</li>
+          <li>点击 "Deploy"</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>⚙️ 配置环境变量</h2>
+        <h3>必需变量</h3>
+        <pre><code>DATABASE_URL=你的数据库连接
+NEXTAUTH_URL=https://你的域名.com
+NEXTAUTH_SECRET=生成的随机密钥</code></pre>
+        <h3>可选变量</h3>
+        <pre><code>ZHIPU_API_KEY=你的智谱AI密钥
+GITHUB_TOKEN=你的GitHub Token</code></pre>
+      </section>
+
+      <!-- 数据库配置 -->
+      <section>
+        <h2>🗄️ 数据库配置</h2>
+        <table>
+          <tr>
+            <th>选项</th>
+            <th>说明</th>
+            <th>适用场景</th>
+          </tr>
+          <tr>
+            <td>Vercel Postgres</td>
+            <td>一键创建</td>
+            <td>推荐</td>
+          </tr>
+          <tr>
+            <td>Neon</td>
+            <td>免费额度</td>
+            <td>小项目</td>
+          </tr>
+          <tr>
+            <td>Supabase</td>
+            <td>功能丰富</td>
+            <td>需要额外功能</td>
+          </tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>🔧 初始化数据库</h2>
+        <pre><code># 方式 1: Prisma Push
+export DATABASE_URL="你的生产数据库URL"
+npx prisma db push
+
+# 方式 2: 迁移文件
+npx prisma migrate deploy
+
+# 导入种子数据（可选）
+npm run db:seed</code></pre>
+      </section>
+
+      <!-- 数据同步 -->
+      <section>
+        <h2>🔄 数据同步</h2>
+        <h3>触发同步 API</h3>
+        <pre><code>curl -X POST https://你的域名.com/api/sync</code></pre>
+        <h3>配置定时同步</h3>
+        <pre><code># vercel.json
+{
+  "crons": [{
+    "path": "/api/sync",
+    "schedule": "0 2 * * *"
+  }]
+}</code></pre>
+      </section>
+
+      <!-- 安全配置 -->
+      <section>
+        <h2>🔒 安全配置</h2>
+        <h3>生成 NEXTAUTH_SECRET</h3>
+        <pre><code># OpenSSL
+openssl rand -base64 32
+
+# Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+# Python
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"</code></pre>
+      </section>
+
+      <!-- 监控和维护 -->
+      <section>
+        <h2>📊 监控和维护</h2>
+        <h3>Vercel Dashboard</h3>
+        <ul>
+          <li>Analytics - 访问统计</li>
+          <li>Logs - 运行日志</li>
+          <li>Deployments - 部署历史</li>
+        </ul>
+        <h3>检查健康状态</h3>
+        <pre><code>curl https://你的域名.com/api/health</code></pre>
+      </section>
+
+      <!-- 常见问题 -->
+      <section>
+        <h2>🐛 常见问题</h2>
+        <h3>构建失败</h3>
+        <pre><code>rm -rf .next node_modules
+npm install
+npm run build</code></pre>
+        <h3>环境变量未生效</h3>
+        <p>配置后点击 Redeploy</p>
+      </section>
+
+      <!-- 部署成功 -->
+      <section class="center">
+        <h1>🎉 部署成功！</h1>
+        <h3>✅ 检查清单</h3>
+        <ul style="text-align: left; display: inline-block;">
+          <li>网站可以访问</li>
+          <li>数据库连接正常</li>
+          <li>搜索功能可用</li>
+          <li>没有控制台错误</li>
+          <li>移动端显示正常</li>
+        </ul>
+      </section>
+
+      <!-- 结束 -->
+      <section class="center">
+        <h1>🙏 感谢</h1>
+        <p>查看完整文档</p>
+        <pre><code>docs/DEPLOYMENT.md</code></pre>
+      </section>
+
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      transition: 'slide',
+      backgroundTransition: 'fade'
+    });
+  </script>
+</body>
+</html>
