@@ -193,13 +193,16 @@ http://localhost:3000/api/auth/signin
 **生成方法**：
 
 ```bash
-# 方法 1: 使用 OpenSSL (推荐)
-openssl rand -base64 32
+# 方法 1: 使用项目自带脚本（推荐）
+npm run generate:secret
 
-# 方法 2: 使用 Node.js
+# 方法 2: 直接运行脚本
+node scripts/generate-secret.js
+
+# 方法 3: 使用 Node.js 一行命令
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
-# 方法 3: 使用 Python
+# 方法 4: 使用 Python
 python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 

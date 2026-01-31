@@ -17,7 +17,8 @@
     "db:import": "tsx scripts/import-data.ts",
     "scraper:build": "tsc lib/scraper/sync-job.ts --outDir dist --module commonjs --esModuleInterop --skipLibCheck",
     "scraper": "node dist/lib/scraper/sync-job.js",
-    "test": "vitest"
+    "test": "vitest",
+    "generate:secret": "node scripts/generate-secret.js"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

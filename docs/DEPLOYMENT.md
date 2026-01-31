@@ -63,6 +63,12 @@ NEXTAUTH_URL=https://你的域名.com
 NEXTAUTH_SECRET=生成的随机密钥
 ```
 
+**生成 NEXTAUTH_SECRET：**
+```bash
+# 使用项目自带脚本（推荐）
+npm run generate:secret
+```
+
 **可选变量：**
 ```bash
 ZHIPU_API_KEY=你的智谱AI密钥
