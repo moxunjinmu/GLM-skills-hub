@@ -138,8 +138,10 @@ export async function scrapeRepository(
 }
 
 /**
- * 爬取多技能仓库（从 skills/ 目录遍历所有子目录）
- * 例如 anthropics/skills 有 17 个独立的技能
+ * 爬取多技能仓库（从 skills/ 目录或根目录遍历所有子目录）
+ * 例如:
+ * - anthropics/skills 有 skills/ 目录，包含多个独立的技能
+ * - ComposioHQ/awesome-claude-skills 技能目录在根目录
  */
 export async function scrapeMultiSkillRepository(
   owner: string,
@@ -163,11 +165,32 @@ export async function scrapeMultiSkillRepository(
     const repoData = await githubApi.getRepository(owner, repo)
     const readme = await githubApi.getReadme(owner, repo)
 
-    // 列出 skills/ 目录内容
-    const skillsDirItems = await githubApi.listDirectory(owner, repo, 'skills')
+    // 首先尝试列出 skills/ 目录内容
+    let skillsDirItems = await githubApi.listDirectory(owner, repo, 'skills')
+    let skillsBaseDir = 'skills'
+
+    // 如果没有 skills/ 目录，尝试从根目录查找包含 skill.md 的子目录
+    if (skillsDirItems.length === 0) {
+      if (verbose) console.log(`  No skills/ directory, checking root for skill directories...`)
+
+      const rootItems = await githubApi.listDirectory(owner, repo, '')
+      // 筛选出可能是技能目录的子目录（包含 skill.md 文件）
+      const potentialSkillDirs = rootItems.filter((item) => item.type === 'dir')
+
+      skillsDirItems = []
+      for (const dir of potentialSkillDirs) {
+        // 检查是否包含 skill.md 或 SKILL.md
+        const hasSkillMd = await githubApi.getFileContent(owner, repo, `${dir.name}/skill.md`) ||
+                          await githubApi.getFileContent(owner, repo, `${dir.name}/SKILL.md`)
+        if (hasSkillMd) {
+          skillsDirItems.push(dir)
+        }
+      }
+      skillsBaseDir = '' // 根目录模式
+    }
 
     if (skillsDirItems.length === 0) {
-      console.log(`No skills/ directory found in ${owner}/${repo}`)
+      console.log(`No skill directories found in ${owner}/${repo}`)
       return { skills, stats }
     }
 
@@ -175,20 +198,28 @@ export async function scrapeMultiSkillRepository(
     const subdirs = skillsDirItems.filter((item) => item.type === 'dir')
     stats.total = subdirs.length
 
-    if (verbose) console.log(`Found ${subdirs.length} skill subdirectories`)
+    if (verbose) console.log(`Found ${subdirs.length} skill subdirectories (in ${skillsBaseDir || 'root'})`)
 
     // 遍历每个子目录
     for (const subdir of subdirs) {
-      const skillMdPath = `${subdir.path}/SKILL.md`
+      // 尝试 skill.md 和 SKILL.md
+      const skillMdPath1 = skillsBaseDir ? `${skillsBaseDir}/${subdir.name}/skill.md` : `${subdir.name}/skill.md`
+      const skillMdPath2 = skillsBaseDir ? `${skillsBaseDir}/${subdir.name}/SKILL.md` : `${subdir.name}/SKILL.md`
 
       try {
-        // 获取 SKILL.md 内容
-        const skillMdContent = await githubApi.getFileContent(owner, repo, skillMdPath)
+        // 优先尝试 skill.md（小写），然后尝试 SKILL.md（大写）
+        let skillMdContent = await githubApi.getFileContent(owner, repo, skillMdPath1)
+        let skillMdPath = skillMdPath1
+
+        if (!skillMdContent) {
+          skillMdContent = await githubApi.getFileContent(owner, repo, skillMdPath2)
+          skillMdPath = skillMdPath2
+        }
 
         if (!skillMdContent) {
           stats.failed++
-          stats.errors.push({ repo: `${owner}/${repo}/${subdir.name}`, error: 'No SKILL.md found' })
-          if (verbose) console.log(`  ✗ ${subdir.name}/ - No SKILL.md`)
+          stats.errors.push({ repo: `${owner}/${repo}/${subdir.name}`, error: 'No skill.md found' })
+          if (verbose) console.log(`  ✗ ${subdir.name}/ - No skill.md`)
           continue
         }
 
@@ -196,7 +227,9 @@ export async function scrapeMultiSkillRepository(
         const parsedSkill = parseSkillMd(skillMdContent)
 
         // 获取子目录的 marketplace.json（可选）
-        const marketplaceJsonPath = `${subdir.path}/marketplace.json`
+        const marketplaceJsonPath = skillsBaseDir
+          ? `${skillsBaseDir}/${subdir.name}/marketplace.json`
+          : `${subdir.name}/marketplace.json`
         const marketplaceJsonContent = await githubApi.getFileContent(owner, repo, marketplaceJsonPath)
         const marketplaceJson = marketplaceJsonContent
           ? JSON.parse(marketplaceJsonContent)

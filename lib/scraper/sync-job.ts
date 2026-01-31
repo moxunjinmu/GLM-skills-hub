@@ -14,7 +14,6 @@ import { githubApi } from '../github/index'
 import {
   scrapeRepository,
   scrapeMultiSkillRepository,
-  scrapeAwesomeList,
   searchSkillRepos,
 } from './github-scraper'
 
@@ -53,7 +52,6 @@ const SYNC_CONFIG = {
   multiSkillRepos: [
     { owner: 'anthropics', repo: 'skills' },
     { owner: 'sickn33', repo: 'antigravity-awesome-skills' },
-    { owner: 'ComposioHQ', repo: 'awesome-claude-skills' },
     { owner: 'JimLiu', repo: 'baoyu-skills' },
     { owner: 'cexll', repo: 'myclaude' },
   ] as RepoConfig[],
@@ -62,7 +60,9 @@ const SYNC_CONFIG = {
   officialRepos: [] as RepoConfig[],
 
   // Awesome 列表（单技能仓库列表）
-  awesomeLists: [] as RepoConfig[],
+  awesomeLists: [
+    { owner: 'ComposioHQ', repo: 'awesome-claude-skills' },
+  ] as RepoConfig[],
 
   // 搜索查询
   searchQueries: [] as string[],
