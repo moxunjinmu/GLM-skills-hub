@@ -24,48 +24,63 @@ export default async function Page({ searchParams }: SearchPageProps) {
   let totalCount = 0
 
   if (query.trim()) {
-    const limit = 12
-    const skip = (page - 1) * limit
+    try {
+      const limit = 12
+      const skip = (page - 1) * limit
 
-    // 构建搜索条件
-    const searchCondition = {
-      isActive: true,
-      OR: [
-        { name: { contains: query, mode: 'insensitive' as const } },
-        { nameZh: { contains: query, mode: 'insensitive' as const } },
-        { description: { contains: query, mode: 'insensitive' as const } },
-        { descriptionZh: { contains: query, mode: 'insensitive' as const } },
-        { skillMdContent: { contains: query, mode: 'insensitive' as const } },
-      ],
-    }
-
-    // 并行查询结果和总数
-    const [results, total] = await Promise.all([
-      prisma.skill.findMany({
-        where: searchCondition,
-        include: {
-          categories: true,
-          tags: true,
-        },
-        orderBy: [
-          { stars: 'desc' },
-          { rating: 'desc' },
+      // 构建搜索条件
+      const searchCondition = {
+        isActive: true,
+        OR: [
+          { name: { contains: query, mode: 'insensitive' as const } },
+          { nameZh: { contains: query, mode: 'insensitive' as const } },
+          { description: { contains: query, mode: 'insensitive' as const } },
+          { descriptionZh: { contains: query, mode: 'insensitive' as const } },
+          { skillMdContent: { contains: query, mode: 'insensitive' as const } },
         ],
-        skip,
-        take: limit,
-      }),
-      prisma.skill.count({ where: searchCondition }),
-    ])
+      }
 
-    searchResults = results
-    totalCount = total
+      // 并行查询结果和总数
+      const [results, total] = await Promise.all([
+        prisma.skill.findMany({
+          where: searchCondition,
+          include: {
+            categories: true,
+            tags: true,
+          },
+          orderBy: [
+            { stars: 'desc' },
+            { rating: 'desc' },
+          ],
+          skip,
+          take: limit,
+        }),
+        prisma.skill.count({ where: searchCondition }),
+      ])
+
+      searchResults = results
+      totalCount = total
+    } catch (error) {
+      console.error('Search error:', error)
+      // 搜索失败时返回空结果
+      searchResults = []
+      totalCount = 0
+    }
   }
 
-  // 获取热门搜索和建议
-  const [popularSearches, suggestedSkills] = await Promise.all([
-    getPopularSearches(),
-    getSuggestedSkills(),
-  ])
+  // 获取热门搜索和建议（添加错误处理）
+  let popularSearches: Array<{ term: string; count: number }> = []
+  let suggestedSkills: Array<any> = []
+
+  try {
+    popularSearches = getPopularSearches()
+    suggestedSkills = await getSuggestedSkills()
+  } catch (error) {
+    console.error('Failed to load search data:', error)
+    // 使用默认值
+    popularSearches = getPopularSearches()
+    suggestedSkills = []
+  }
 
   return (
     <SearchPage
@@ -82,7 +97,7 @@ export default async function Page({ searchParams }: SearchPageProps) {
 /**
  * 获取热门搜索词
  */
-async function getPopularSearches() {
+function getPopularSearches() {
   // 返回一些预设的热门搜索词
   return [
     { term: 'React', count: 1250 },

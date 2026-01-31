@@ -11,9 +11,10 @@ type SignInPageProps = {
 export default async function SignInPage({
   searchParams,
 }: SignInPageProps) {
-  const resolvedParams = await searchParams
-  const error = resolvedParams.error
-  const callbackUrl = resolvedParams.callbackUrl || '/'
+  try {
+    const resolvedParams = await searchParams
+    const error = resolvedParams.error
+    const callbackUrl = resolvedParams.callbackUrl || '/'
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4">
@@ -78,4 +79,16 @@ export default async function SignInPage({
       </div>
     </div>
   )
+  } catch (error) {
+    console.error('SignIn page error:', error)
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">页面加载失败</h1>
+          <p className="text-gray-400 mb-6">请稍后重试或联系管理员</p>
+          <a href="/" className="text-blue-400 hover:underline">返回首页</a>
+        </div>
+      </div>
+    )
+  }
 }
