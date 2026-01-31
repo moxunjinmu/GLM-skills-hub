@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Heart, Share2, Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
@@ -17,12 +17,66 @@ interface SkillActionsProps {
 
 export function SkillActions({ skill }: SkillActionsProps) {
   const [isFavorited, setIsFavorited] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [copied, setCopied] = useState(false)
 
+  // 检查是否已收藏
+  useEffect(() => {
+    async function checkFavorite() {
+      try {
+        const response = await fetch(`/api/favorites?limit=100`)
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success) {
+            const favorited = result.data.favorites.some(
+              (f: any) => f.skill.id === skill.id
+            )
+            setIsFavorited(favorited)
+          }
+        }
+      } catch (error) {
+        console.error('检查收藏状态失败:', error)
+      }
+    }
+    checkFavorite()
+  }, [skill.id])
+
   const handleFavorite = async () => {
-    // TODO: 实现 API 调用
-    setIsFavorited(!isFavorited)
-    toast.success(isFavorited ? '已取消收藏' : '已添加到收藏')
+    setIsLoading(true)
+    try {
+      if (isFavorited) {
+        // 取消收藏
+        const response = await fetch(`/api/favorites?skillId=${skill.id}`, {
+          method: 'DELETE',
+        })
+        if (response.ok) {
+          setIsFavorited(false)
+          toast.success('已取消收藏')
+        } else {
+          const error = await response.json()
+          toast.error(error.message || '取消收藏失败')
+        }
+      } else {
+        // 添加收藏
+        const response = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skillId: skill.id }),
+        })
+        if (response.ok) {
+          setIsFavorited(true)
+          toast.success('已添加到收藏')
+        } else {
+          const error = await response.json()
+          toast.error(error.message || '添加收藏失败')
+        }
+      }
+    } catch (error) {
+      console.error('收藏操作失败:', error)
+      toast.error('操作失败，请稍后重试')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleShare = async () => {
@@ -65,9 +119,10 @@ export function SkillActions({ skill }: SkillActionsProps) {
         variant={isFavorited ? 'default' : 'outline'}
         size="sm"
         onClick={handleFavorite}
+        disabled={isLoading}
       >
         <Heart className={`h-4 w-4 ${isFavorited ? 'fill-current' : ''}`} />
-        收藏
+        {isLoading ? '处理中...' : isFavorited ? '已收藏' : '收藏'}
       </Button>
 
       {/* 分享按钮 */}
