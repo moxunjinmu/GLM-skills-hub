@@ -104,13 +104,13 @@ const tags = [
   { name: 'Deployment', nameZh: '部署自动化', slug: 'deployment', type: 'USE_CASE' },
   { name: 'Refactoring', nameZh: '代码重构', slug: 'refactoring', type: 'USE_CASE' },
 
-  // 编程语言标签
+  // 编程语言标签（使用不同名称避免唯一约束冲突）
   { name: 'JavaScript', nameZh: 'JavaScript', slug: 'javascript', type: 'LANGUAGE' },
-  { name: 'TypeScript', nameZh: 'TypeScript', slug: 'typescript-lang', type: 'LANGUAGE' },
-  { name: 'Python', nameZh: 'Python', slug: 'python-lang', type: 'LANGUAGE' },
+  { name: 'TypeScript Lang', nameZh: 'TypeScript', slug: 'typescript-lang', type: 'LANGUAGE' },
+  { name: 'Python Lang', nameZh: 'Python', slug: 'python-lang', type: 'LANGUAGE' },
   { name: 'Java', nameZh: 'Java', slug: 'java', type: 'LANGUAGE' },
-  { name: 'Go', nameZh: 'Go', slug: 'go-lang', type: 'LANGUAGE' },
-  { name: 'Rust', nameZh: 'Rust', slug: 'rust-lang', type: 'LANGUAGE' },
+  { name: 'Go Lang', nameZh: 'Go', slug: 'go-lang', type: 'LANGUAGE' },
+  { name: 'Rust Lang', nameZh: 'Rust', slug: 'rust-lang', type: 'LANGUAGE' },
   { name: 'C++', nameZh: 'C++', slug: 'cpp', type: 'LANGUAGE' },
   { name: 'Ruby', nameZh: 'Ruby', slug: 'ruby', type: 'LANGUAGE' },
 ]
