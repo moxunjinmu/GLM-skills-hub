@@ -5,6 +5,7 @@
 
 import { prisma } from '@/lib/db'
 import { generateEmbedding, cosineSimilarity, preprocessText } from '@/lib/embeddings/zhipu-embedding'
+import { Prisma } from '@prisma/client'
 
 // 搜索模式枚举
 export enum SearchMode {
@@ -130,7 +131,7 @@ async function searchByKeyword(
 
 /**
  * AI 语义搜索
- * 使用智谱 AI 文本嵌入和余弦相似度
+ * 使用预存的嵌入向量和余弦相似度
  */
 async function searchBySemantic(
   query: string,
@@ -144,8 +145,11 @@ async function searchBySemantic(
   // 使用智谱 AI 生成查询向量
   const queryEmbedding = await generateEmbedding(preprocessedQuery)
 
-  // 获取候选 Skills
-  const where: any = { isActive: true }
+  // 获取候选 Skills（只获取有嵌入向量的技能）
+  const where: any = {
+    isActive: true,
+    embedding: { not: Prisma.DbNull }, // 只搜索有嵌入向量的技能
+  }
 
   if (categoryId) {
     where.categories = { some: { slug: categoryId } }
@@ -159,7 +163,18 @@ async function searchBySemantic(
 
   const skills = await prisma.skill.findMany({
     where,
-    include: {
+    select: {
+      id: true,
+      name: true,
+      nameZh: true,
+      description: true,
+      descriptionZh: true,
+      slug: true,
+      stars: true,
+      rating: true,
+      usageCount: true,
+      repository: true,
+      embedding: true,
       categories: true,
       tags: true,
     },
@@ -170,13 +185,10 @@ async function searchBySemantic(
   const results: SearchResult[] = []
 
   for (const skill of skills) {
-    // 构建 Skill 的文本表示
-    const skillText = preprocessText(
-      `${skill.name} ${skill.nameZh || ''} ${skill.description} ${skill.descriptionZh || ''}`
-    )
+    if (!skill.embedding) continue
 
-    // 生成 Skill 的嵌入向量（TODO: 实际应用中应该预存到数据库）
-    const skillEmbedding = await generateEmbedding(skillText)
+    // 使用预存的嵌入向量
+    const skillEmbedding = skill.embedding as number[]
 
     // 计算余弦相似度
     const similarity = cosineSimilarity(queryEmbedding, skillEmbedding)

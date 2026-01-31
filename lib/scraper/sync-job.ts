@@ -16,6 +16,7 @@ import {
   scrapeMultiSkillRepository,
   searchSkillRepos,
 } from './github-scraper'
+import { generateEmbedding, preprocessText } from '../embeddings/zhipu-embedding'
 
 /**
  * 仓库配置类型
@@ -452,6 +453,24 @@ async function upsertSkill(skillData: any): Promise<'added' | 'updated'> {
   // 清理数据，移除不能直接设置的关联字段
   const { categories, tags, ...cleanData } = skillData
 
+  // 生成嵌入向量
+  const textParts = [
+    skillData.name,
+    skillData.nameZh || '',
+    skillData.description,
+    skillData.descriptionZh || '',
+  ]
+  if (skillData.skillMdContent) {
+    const maxLength = 2000
+    const content = skillData.skillMdContent.length > maxLength
+      ? skillData.skillMdContent.substring(0, maxLength)
+      : skillData.skillMdContent
+    textParts.push(content)
+  }
+  const fullText = textParts.join('\n\n')
+  const preprocessedText = preprocessText(fullText)
+  const embedding = await generateEmbedding(preprocessedText)
+
   if (existing) {
     // 更新
     await prisma.skill.update({
@@ -460,6 +479,8 @@ async function upsertSkill(skillData: any): Promise<'added' | 'updated'> {
         ...cleanData,
         id: existing.id, // 保持原 ID
         syncedAt: new Date(),
+        embedding,
+        embeddingUpdatedAt: new Date(),
       },
     })
     return 'updated'
@@ -469,6 +490,8 @@ async function upsertSkill(skillData: any): Promise<'added' | 'updated'> {
       data: {
         ...cleanData,
         syncedAt: new Date(),
+        embedding,
+        embeddingUpdatedAt: new Date(),
       },
     })
     return 'added'

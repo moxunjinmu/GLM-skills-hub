@@ -53,6 +53,10 @@ model Skill {
   readmeContent   String?  @db.Text
   marketplaceJson Json?
 
+  // 搜索优化：预存储的嵌入向量（使用 Json 存储数组）
+  embedding       Json?    // 嵌入向量数组
+  embeddingUpdatedAt DateTime? // 嵌入向量更新时间
+
   // 状态标记
   isOfficial      Boolean  @default(false) // 是否官方技能
   isVerified      Boolean  @default(false) // 是否已验证
