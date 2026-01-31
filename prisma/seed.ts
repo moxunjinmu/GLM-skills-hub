@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, TagType } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -83,7 +83,7 @@ const categories = [
 /**
  * 标签种子数据
  */
-const tags = [
+const tags: Array<{ name: string; nameZh: string; slug: string; type: TagType }> = [
   // 技术栈标签
   { name: 'React', nameZh: 'React', slug: 'react', type: 'TECH_STACK' },
   { name: 'Vue', nameZh: 'Vue', slug: 'vue', type: 'TECH_STACK' },

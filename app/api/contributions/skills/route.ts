@@ -41,8 +41,7 @@ export async function POST(request: NextRequest) {
           userId,
           type: 'SUBMIT_SKILL',
           content: {
-            path: ['repository'],
-            equals: repository,
+            contains: repository,
           },
         },
       })

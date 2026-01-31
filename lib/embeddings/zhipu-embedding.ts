@@ -11,7 +11,7 @@ interface ZhipuEmbeddingResponse {
   code: number
   msg: string
   data: {
-    embedding: number[]
+    embedding: Array<number>
     index: number
     object: string
   }[]
@@ -30,7 +30,7 @@ interface ZhipuEmbeddingResponse {
  * @param text 输入文本
  * @returns 嵌入向量 (1024 维)
  */
-export async function generateEmbedding(text: string): Promise<number[]> {
+export async function generateEmbedding(text: string): Promise<Array<number>> {
   const apiKey = process.env.ZHIPU_API_KEY
 
   if (!apiKey) {
@@ -81,7 +81,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
  * @param texts 输入文本数组
  * @returns 嵌入向量数组
  */
-export async function generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
+export async function generateBatchEmbeddings(texts: string[]): Promise<Array<Array<number>>> {
   const apiKey = process.env.ZHIPU_API_KEY
 
   if (!apiKey) {
@@ -134,7 +134,7 @@ export async function generateBatchEmbeddings(texts: string[]): Promise<number[]
  * @param b 向量 B
  * @returns 相似度 (0-1)
  */
-export function cosineSimilarity(a: number[], b: number[]): number {
+export function cosineSimilarity(a: Array<number>, b: Array<number>): number {
   if (a.length !== b.length) return 0
 
   let dotProduct = 0
@@ -159,10 +159,10 @@ export function cosineSimilarity(a: number[], b: number[]): number {
  * 降级嵌入生成方法
  * 当智谱 AI API 不可用时使用
  */
-function generateFallbackEmbedding(text: string): number[]> {
+function generateFallbackEmbedding(text: string): Array<number> {
   const normalizedText = text.toLowerCase()
   const dimension = 1024 // 与智谱 embedding-3 维度一致
-  const vector = new Array(dimension).fill(0)
+  const vector = new Array<number>(dimension).fill(0)
 
   // 使用简单的哈希算法生成伪向量
   let hash = 0

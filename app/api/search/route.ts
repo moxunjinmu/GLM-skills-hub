@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     // TODO: 实现搜索建议逻辑
-    const suggestions = []
+    const suggestions: string[] = []
 
     return NextResponse.json({
       success: true,

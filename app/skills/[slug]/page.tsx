@@ -5,10 +5,14 @@ import { Button } from '@/components/ui/button'
 import { SkillActions } from '@/components/skill/skill-actions'
 import { SkillTabs } from '@/components/skill/skill-tabs'
 
+// 禁用静态生成，使用动态渲染
+export const dynamic = 'force-dynamic'
+
 interface SkillPageProps {
-  params: {
+  params?: Promise<{
     slug: string
-  }
+  }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
 /**
@@ -58,8 +62,10 @@ export async function generateStaticParams() {
  * 生成元数据
  */
 export async function generateMetadata({ params }: SkillPageProps) {
+  const resolvedParams = await params
+  const slug = resolvedParams?.slug ?? ''
   const skill = await prisma.skill.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     select: {
       name: true,
       nameZh: true,
@@ -87,7 +93,9 @@ export async function generateMetadata({ params }: SkillPageProps) {
  * Skill 详情页
  */
 export default async function SkillPage({ params }: SkillPageProps) {
-  const skill = await getSkill(params.slug)
+  const resolvedParams = await params
+  const slug = resolvedParams?.slug ?? ''
+  const skill = await getSkill(slug)
 
   if (!skill) {
     notFound()

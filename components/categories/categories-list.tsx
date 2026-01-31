@@ -7,7 +7,7 @@ export interface CategoryWithCount {
   nameZh: string
   slug: string
   icon: string
-  description: string
+  description: string | null
   order: number
   isActive: boolean
   _count: {
@@ -43,9 +43,11 @@ export function CategoriesList({ categories }: CategoriesListProps) {
           </h3>
 
           {/* 描述 */}
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-            {category.description}
-          </p>
+          {category.description && (
+            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+              {category.description}
+            </p>
+          )}
 
           {/* 统计 */}
           <div className="text-sm font-medium text-primary">

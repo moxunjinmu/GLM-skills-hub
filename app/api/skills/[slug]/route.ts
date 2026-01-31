@@ -13,7 +13,7 @@ export async function GET(
     const { slug } = await params;
 
     const skill = await prisma.skill.findUnique({
-      where: { slug },
+      where: { slug: slug ?? '' },
       include: {
         categories: {
           select: {

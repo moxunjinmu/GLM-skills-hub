@@ -5,11 +5,14 @@ import { Suspense } from 'react'
 import { CategoryHeader } from '@/components/category/category-header'
 import { SkillsGrid } from '@/components/skill/skills-grid'
 
+// 禁用静态生成，使用动态渲染
+export const dynamic = 'force-dynamic'
+
 interface CategoryPageProps {
-  params: Promise<{
+  params?: Promise<{
     slug: string
   }>
-  searchParams: Promise<{
+  searchParams?: Promise<{
     page?: string
     sort?: string
   }>
@@ -36,15 +39,15 @@ async function getCategory(slug: string) {
  */
 async function getCategorySkills(
   categoryId: string,
-  params: CategoryPageProps['searchParams']
+  searchParams: { page?: string; sort?: string }
 ) {
-  const page = parseInt(params.page || '1')
+  const page = parseInt(searchParams.page || '1')
   const limit = 12
   const skip = (page - 1) * limit
 
   // 排序方式
   let orderBy: any = { createdAt: 'desc' }
-  switch (params.sort) {
+  switch (searchParams.sort) {
     case 'stars':
       orderBy = { stars: 'desc' }
       break
@@ -128,7 +131,8 @@ export async function generateStaticParams() {
  * 生成元数据
  */
 export async function generateMetadata({ params }: CategoryPageProps) {
-  const { slug } = await params
+  const resolvedParams = await params
+  const slug = resolvedParams?.slug ?? ''
   const category = await getCategory(slug)
 
   if (!category) {
@@ -150,8 +154,9 @@ export default async function CategoryPage({
   params,
   searchParams,
 }: CategoryPageProps) {
-  const { slug } = await params
-  const resolvedSearchParams = await searchParams
+  const resolvedParams = await params
+  const slug = resolvedParams?.slug ?? ''
+  const resolvedSearchParams = await searchParams ?? {}
   const category = await getCategory(slug)
 
   if (!category) {
