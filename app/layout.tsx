@@ -29,7 +29,12 @@ export const metadata: Metadata = {
   keywords: ['Claude Skills', 'AI Agent', 'Skills Hub', '技能市场', '中文本地化', 'Claude Code'],
   authors: [{ name: 'GLM Skills Hub' }],
   creator: 'GLM Skills Hub',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL &&
+    !process.env.NEXT_PUBLIC_SITE_URL.startsWith('http')
+      ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
+      : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  ),
   icons: {
     icon: '/logo.png',
     shortcut: '/logo.png',
