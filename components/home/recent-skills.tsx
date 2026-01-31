@@ -34,7 +34,7 @@ const recentSkills = [
 /**
  * 最新收录 Skills 组件
  */
-export async function RecentSkills() {
+export function RecentSkills() {
   return (
     <div className="space-y-4">
       {recentSkills.map((skill) => (

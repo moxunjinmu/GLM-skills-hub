@@ -131,7 +131,7 @@ export function ContributePage() {
                       </p>
                       <Button variant="outline" size="sm" asChild>
                         <a
-                          href="https://github.com/your-org/glm-skills-hub"
+                          href={`https://github.com/${process.env.NEXT_PUBLIC_GITHUB_ORG || 'your-org'}/GLM-skills-hub`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2"

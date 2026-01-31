@@ -46,7 +46,7 @@ const featuredSkills = [
 /**
  * 精选 Skills 展示组件
  */
-export async function FeaturedSkills() {
+export function FeaturedSkills() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {featuredSkills.map((skill) => (

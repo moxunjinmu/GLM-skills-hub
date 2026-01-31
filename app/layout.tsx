@@ -30,17 +30,24 @@ export const metadata: Metadata = {
   authors: [{ name: 'GLM Skills Hub' }],
   creator: 'GLM Skills Hub',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'zh_CN',
     title: 'GLM Skills Hub - AI Agent Skills 中文聚合平台',
     description: '收集、整理、展示 Claude Skills 和其他 AI Agent 技能，提供中文介绍、使用指南和在线试用服务',
     siteName: 'GLM Skills Hub',
+    images: ['/logo.png'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'GLM Skills Hub - AI Agent Skills 中文聚合平台',
     description: '收集、整理、展示 Claude Skills 和其他 AI Agent 技能',
+    images: ['/logo.png'],
   },
   robots: {
     index: true,

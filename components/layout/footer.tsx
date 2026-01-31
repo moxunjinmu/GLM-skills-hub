@@ -3,7 +3,7 @@ import { Github, Heart } from 'lucide-react'
 
 // 从环境变量获取 GitHub 组织，如果没有配置则使用默认值
 const GITHUB_ORG = process.env.NEXT_PUBLIC_GITHUB_ORG || 'your-org'
-const GITHUB_REPO_URL = `https://github.com/${GITHUB_ORG}/glm-skills-hub`
+const GITHUB_REPO_URL = `https://github.com/${GITHUB_ORG}/GLM-skills-hub`
 
 export function Footer() {
   return (

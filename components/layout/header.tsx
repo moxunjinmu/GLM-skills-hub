@@ -3,16 +3,18 @@
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { LoginButton } from '@/components/auth/login-button'
+import { Logo } from '@/components/logo'
 import { Github, Search } from 'lucide-react'
 
 export function Header() {
+  const GITHUB_REPO_URL = `https://github.com/${process.env.NEXT_PUBLIC_GITHUB_ORG || 'your-org'}/GLM-skills-hub`
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-lg bg-primary" />
-          <span className="font-bold text-xl">GLM Skills Hub</span>
+        <Link href="/">
+          <Logo size="md" />
         </Link>
 
         {/* 导航 */}
@@ -40,7 +42,7 @@ export function Header() {
           </Link>
 
           <a
-            href="https://github.com/your-org/glm-skills-hub"
+            href={GITHUB_REPO_URL}
             target="_blank"
             rel="noopener noreferrer"
           >

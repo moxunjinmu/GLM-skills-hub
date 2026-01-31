@@ -1,4 +1,5 @@
 import { signIn } from '@/lib/auth/config'
+import { Logo } from '@/components/logo'
 import { Github } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -27,9 +28,7 @@ export default async function SignInPage({
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 p-8 shadow-xl">
           {/* Logo */}
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">GH</span>
-            </div>
+            <Logo size="lg" showText={false} />
           </div>
 
           {/* 错误提示 */}
