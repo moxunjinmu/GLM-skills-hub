@@ -75,7 +75,6 @@ async function exportAsSQL() {
       skill.forks,
       skill.openIssues,
       skill.lastCommit?.toISOString() || null,
-      skill.imageUrl || null,
       skill.isOfficial,
       skill.featured,
       skill.isActive,
@@ -88,7 +87,7 @@ async function exportAsSQL() {
       skill.updatedAt.toISOString(),
     ].map((v) => (v === null ? 'NULL' : `'${v?.toString().replace(/'/g, "''")}'`))
 
-    return `INSERT INTO skills (id, name, "nameZh", description, "descriptionZh", repository, author, stars, forks, "openIssues", "lastCommit", "imageUrl", "isOfficial", featured, "isActive", "usageCount", "viewCount", rating, "ratingCount", "syncedAt", "createdAt", "updatedAt") VALUES (${values.join(', ')});`
+    return `INSERT INTO skills (id, name, "nameZh", description, "descriptionZh", repository, author, stars, forks, "openIssues", "lastCommit", "isOfficial", featured, "isActive", "usageCount", "viewCount", rating, "ratingCount", "syncedAt", "createdAt", "updatedAt") VALUES (${values.join(', ')});`
   })
 
   const outputPath = path.join(process.cwd(), 'skills-export.sql')
