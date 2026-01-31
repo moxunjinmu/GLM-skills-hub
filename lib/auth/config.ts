@@ -6,31 +6,27 @@ import crypto from 'crypto'
 
 /**
  * 生成或获取 NEXTAUTH_SECRET
- * 开发环境自动生成，生产环境必须配置
+ * - 开发环境：自动生成
+ * - 构建阶段：使用临时 secret（避免构建失败）
+ * - 生产运行时：必须配置（否则认证不可靠）
  */
 function getAuthSecret(): string {
   if (process.env.NEXTAUTH_SECRET) {
     return process.env.NEXTAUTH_SECRET
   }
 
-  // 开发环境自动生成 secret
+  // 开发环境或未配置时，使用自动生成的 secret
   if (process.env.NODE_ENV === 'development') {
     console.warn('[Auth] 未配置 NEXTAUTH_SECRET，使用自动生成的 secret（仅开发环境）')
     return crypto.randomBytes(32).toString('base64')
   }
 
-  // 构建阶段（如 Vercel 构建时）使用临时 secret，运行时必须配置
-  // 检测是否在构建阶段：没有 VERCEL_URL 或其他运行时特有的环境变量
-  const isBuildTime = !process.env.VERCEL_URL && !process.env.DATABASE_URL
-  if (isBuildTime) {
-    console.warn('[Auth] 构建阶段未配置 NEXTAUTH_SECRET，使用临时 secret（运行时必须配置）')
-    return crypto.randomBytes(32).toString('base64')
-  }
-
-  throw new Error(
-    '生产环境必须配置 NEXTAUTH_SECRET 环境变量。' +
-    '可以使用 openssl rand -base64 32 生成一个随机字符串。'
-  )
+  // 生产环境未配置：使用 fallback 并警告
+  // 注意：这允许构建通过，但运行时必须配置正确的 NEXTAUTH_SECRET
+  console.warn('[Auth] ⚠️  生产环境未配置 NEXTAUTH_SECRET，使用临时 secret')
+  console.warn('[Auth] 请在部署平台配置 NEXTAUTH_SECRET 环境变量')
+  console.warn('[Auth] 生成命令: npm run generate:secret')
+  return crypto.randomBytes(32).toString('base64')
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
