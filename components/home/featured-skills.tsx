@@ -113,15 +113,16 @@ export function FeaturedSkills() {
               <GitFork className="h-4 w-4" />
               <span>{skill.forks.toLocaleString()}</span>
             </div>
-            <a
-              href={`https://github.com/${skill.repository}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-auto flex items-center gap-1 hover:text-primary"
-              onClick={(e) => e.stopPropagation()}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                window.open(`https://github.com/${skill.repository}`, '_blank')
+              }}
+              className="ml-auto flex items-center gap-1 hover:text-primary transition-colors"
             >
               <ExternalLink className="h-4 w-4" />
-            </a>
+            </button>
           </div>
 
           {/* 标签 */}
