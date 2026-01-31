@@ -30,7 +30,7 @@ function getAuthSecret(): string {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as any,
   secret: getAuthSecret(),
   providers: [
     GitHub({
@@ -39,9 +39,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    /**
+     * 将用户信息（包括 githubId、credits）添加到 session 中
+     */
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id
+        // 从数据库获取完整的用户信息
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { githubId: true, credits: true, bio: true },
+        })
+        if (dbUser) {
+          ;(session.user as any).githubId = dbUser.githubId
+          ;(session.user as any).credits = dbUser.credits
+          ;(session.user as any).bio = dbUser.bio
+        }
       }
       return session
     },
@@ -52,5 +65,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   session: {
     strategy: 'database',
+  },
+  events: {
+    /**
+     * 在创建新用户时自动设置 githubId
+     * 通过 createUser 事件处理，确保 githubId 在用户创建后立即填充
+     */
+    async createUser({ user }) {
+      // 获取该用户的 GitHub 账号信息
+      const account = await prisma.account.findFirst({
+        where: { userId: user.id },
+      })
+      if (account?.provider === 'github') {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { githubId: account.providerAccountId },
+        })
+      }
+    },
   },
 })

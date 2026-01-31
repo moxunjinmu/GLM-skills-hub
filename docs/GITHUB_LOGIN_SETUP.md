@@ -10,9 +10,9 @@
 
 | 文件 | 状态 |
 |------|------|
-| `lib/auth/config.ts` | ✅ NextAuth 配置 |
+| `lib/auth/config.ts` | ✅ NextAuth 配置（含 createUser 事件处理 githubId） |
 | `app/api/auth/[...nextauth]/route.ts` | ✅ API 路由 |
-| `prisma/schema.prisma` | ✅ 数据模型（User/Account/Session） |
+| `prisma/schema.prisma` | ✅ 数据模型（User.githubId 为可选字段） |
 | `components/providers/session-provider.tsx` | ✅ SessionProvider |
 | `components/auth/login-button.tsx` | ✅ 登录按钮组件 |
 | `app/auth/signin/page.tsx` | ✅ 登录页面 |
@@ -69,7 +69,15 @@ NEXTAUTH_SECRET="生产环境必须配置新的随机字符串"
 > **⚠️ 重要**: 生产环境的 `NEXTAUTH_SECRET` 必须是强随机字符串！
 > 生成命令: `openssl rand -base64 32`
 
-### 步骤 5: 重启开发服务器
+### 步骤 5: 同步数据库结构
+
+由于 `githubId` 字段改为可选，需要更新数据库：
+
+```bash
+npx prisma db push
+```
+
+### 步骤 6: 重启开发服务器
 
 ```bash
 # 停止当前服务器 (Ctrl+C)
@@ -97,7 +105,7 @@ http://localhost:3000/auth/signin
 ```bash
 npx prisma studio
 ```
-查看 `User`、`Account`、`Session` 表是否有数据
+查看 `User`、`Account`、`Session` 表是否有数据，`githubId` 字段是否被正确填充
 
 ---
 
@@ -120,6 +128,10 @@ npx prisma studio
 ```bash
 npx prisma db push
 ```
+
+### 问题 4: Prisma 验证错误 `githubId is missing`
+
+**已修复**: `githubId` 字段已改为可选，通过 `createUser` 事件在用户创建后自动填充
 
 ---
 

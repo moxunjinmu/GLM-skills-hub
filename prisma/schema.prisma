@@ -111,7 +111,7 @@ enum TagType {
 /// User (用户)
 model User {
   id           String    @id @default(cuid())
-  githubId     String    @unique
+  githubId     String?   @unique  // 改为可选，首次登录时通过事件填充
   name         String?
   email        String?   @unique
   emailVerified DateTime?
