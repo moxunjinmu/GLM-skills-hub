@@ -6,6 +6,7 @@
 import { githubApi } from '../github/index'
 import { parseSkillMd, extractInstallCommand, generateSlug } from './skill-parser'
 import { SkillInput } from '../../types/index'
+import { translateSkillData } from '../translator/zhipu-translator'
 
 /**
  * 爬取统计信息
@@ -97,16 +98,35 @@ export async function scrapeRepository(
       ? JSON.parse(marketplaceJsonContent)
       : null
 
+    // 自动翻译为中文
+    let nameZh: string | null = null
+    let descriptionZh: string | null = null
+
+    try {
+      console.log(`  🌐 正在翻译 ${parsedSkill.metadata.name}...`)
+      const translations = await translateSkillData({
+        name: parsedSkill.metadata.name,
+        description: parsedSkill.metadata.description,
+      })
+      nameZh = translations.nameZh
+      descriptionZh = translations.descriptionZh
+      if (nameZh) console.log(`    ✓ 名称: ${nameZh}`)
+      if (descriptionZh) console.log(`    ✓ 描述已翻译`)
+    } catch (error) {
+      // 翻译失败不影响主流程
+      console.warn(`  ⚠ 翻译失败: ${error instanceof Error ? error.message : String(error)}`)
+    }
+
     // 构建 Skill 数据
     const slug = marketplaceJson?.id || generateSlug(parsedSkill.metadata.name)
     const installCommand = marketplaceJson?.installCommand || extractInstallCommand(`${owner}/${repo}`)
 
     const skillData: SkillInput = {
       name: parsedSkill.metadata.name,
-      nameZh: null, // 待翻译
+      nameZh,
       slug,
       description: parsedSkill.metadata.description,
-      descriptionZh: null, // 待翻译
+      descriptionZh,
       repository: `${owner}/${repo}`,
       author: owner,
       authorId: String(repoData.owner.id),
@@ -235,6 +255,25 @@ export async function scrapeMultiSkillRepository(
           ? JSON.parse(marketplaceJsonContent)
           : null
 
+        // 自动翻译为中文
+        let nameZh: string | null = null
+        let descriptionZh: string | null = null
+
+        try {
+          console.log(`  🌐 正在翻译 ${parsedSkill.metadata.name}...`)
+          const translations = await translateSkillData({
+            name: parsedSkill.metadata.name,
+            description: parsedSkill.metadata.description,
+          })
+          nameZh = translations.nameZh
+          descriptionZh = translations.descriptionZh
+          if (nameZh) console.log(`    ✓ 名称: ${nameZh}`)
+          if (descriptionZh) console.log(`    ✓ 描述已翻译`)
+        } catch (error) {
+          // 翻译失败不影响主流程
+          console.warn(`  ⚠ 翻译失败: ${error instanceof Error ? error.message : String(error)}`)
+        }
+
         // 构建唯一的 slug（包含仓库名和子目录名）
         // 例如: algorithmic-art-anthropic-skills
         const baseSlug = marketplaceJson?.id || generateSlug(parsedSkill.metadata.name)
@@ -246,10 +285,10 @@ export async function scrapeMultiSkillRepository(
 
         const skillData: SkillInput = {
           name: parsedSkill.metadata.name,
-          nameZh: null,
+          nameZh,
           slug: uniqueSlug,
           description: parsedSkill.metadata.description,
-          descriptionZh: null,
+          descriptionZh,
           repository: `${owner}/${repo}`,
           author: owner,
           authorId: String(repoData.owner.id),
