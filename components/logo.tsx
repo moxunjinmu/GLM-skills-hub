@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 interface LogoProps {
   className?: string
   size?: 'sm' | 'md' | 'lg'
@@ -15,12 +17,13 @@ export function Logo({ className = '', size = 'md', showText = true }: LogoProps
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <img
+      <Image
         src="/logo.png"
         alt="GLM Skills Hub"
         width={width}
         height={height}
         className="dark:invert"
+        priority={size === 'lg'} // Logo in header should be priority loaded
       />
       {showText && (
         <span className="font-bold text-xl hidden sm:inline-block">
