@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Heart, Share2, Copy, Check } from 'lucide-react'
+import { Heart, Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
+import { ShareDialog } from '@/components/share/share-dialog'
 
 interface SkillActionsProps {
   skill: {
@@ -19,6 +20,7 @@ export function SkillActions({ skill }: SkillActionsProps) {
   const [isFavorited, setIsFavorited] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
 
   // 检查是否已收藏
   useEffect(() => {
@@ -79,22 +81,6 @@ export function SkillActions({ skill }: SkillActionsProps) {
     }
   }
 
-  const handleShare = async () => {
-    const url = window.location.href
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: skill.name,
-          url,
-        })
-      } catch (error) {
-        console.error('Share failed:', error)
-      }
-    } else {
-      await copyToClipboard(url)
-    }
-  }
-
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text)
@@ -113,55 +99,68 @@ export function SkillActions({ skill }: SkillActionsProps) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      {/* 收藏按钮 */}
-      <Button
-        variant={isFavorited ? 'default' : 'outline'}
-        size="sm"
-        onClick={handleFavorite}
-        disabled={isLoading}
-      >
-        <Heart className={`h-4 w-4 ${isFavorited ? 'fill-current' : ''}`} />
-        {isLoading ? '处理中...' : isFavorited ? '已收藏' : '收藏'}
-      </Button>
+    <>
+      <div className="flex items-center gap-2">
+        {/* 收藏按钮 */}
+        <Button
+          variant={isFavorited ? 'default' : 'outline'}
+          size="sm"
+          onClick={handleFavorite}
+          disabled={isLoading}
+        >
+          <Heart className={`h-4 w-4 ${isFavorited ? 'fill-current' : ''}`} />
+          {isLoading ? '处理中...' : isFavorited ? '已收藏' : '收藏'}
+        </Button>
 
-      {/* 分享按钮 */}
-      <Button variant="outline" size="sm" onClick={handleShare}>
-        <Share2 className="h-4 w-4" />
-      </Button>
-
-      {/* 复制安装命令 */}
-      {skill.installCommand && (
+        {/* 分享按钮 */}
         <Button
           variant="outline"
           size="sm"
-          onClick={handleCopyInstall}
-          className="min-w-[120px]"
+          onClick={() => setShowShareDialog(true)}
         >
-          {copied ? (
-            <>
-              <Check className="h-4 w-4 mr-1" />
-              已复制
-            </>
-          ) : (
-            <>
-              <Copy className="h-4 w-4 mr-1" />
-              复制安装
-            </>
-          )}
+          分享
         </Button>
-      )}
 
-      {/* GitHub 链接 */}
-      <Button variant="outline" size="sm" asChild>
-        <a
-          href={`https://github.com/${skill.repository}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          GitHub
-        </a>
-      </Button>
-    </div>
+        {/* 复制安装命令 */}
+        {skill.installCommand && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopyInstall}
+            className="min-w-[120px]"
+          >
+            {copied ? (
+              <>
+                <Check className="h-4 w-4 mr-1" />
+                已复制
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4 mr-1" />
+                复制安装
+              </>
+            )}
+          </Button>
+        )}
+
+        {/* GitHub 链接 */}
+        <Button variant="outline" size="sm" asChild>
+          <a
+            href={`https://github.com/${skill.repository}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub
+          </a>
+        </Button>
+      </div>
+
+      {/* 分享对话框 */}
+      <ShareDialog
+        skillId={skill.id}
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+      />
+    </>
   )
 }

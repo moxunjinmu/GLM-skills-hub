@@ -313,6 +313,7 @@ enum UsageAction {
   TRIAL       // 在线试用
   INSTALL     // 点击安装
   FAVORITE    // 收藏
+  SHARE       // 分享
 }
 
 // ==================== 积分记录 ====================
@@ -338,6 +339,7 @@ enum CreditReason {
   SUBMIT_SKILL   // 提交技能
   TRANSLATE      // 贡献翻译
   INVITE         // 邀请用户
+  SHARE          // 分享奖励
   TRIAL_USE      // 试用消耗
   AI_SEARCH      // AI搜索消耗
   MANUAL_ADJUST  // 手动调整
