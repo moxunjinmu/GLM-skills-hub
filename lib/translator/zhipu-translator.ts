@@ -13,7 +13,7 @@ const TRANSLATE_CONFIG = {
   // API 配置
   apiKey: process.env.ZHIPU_API_KEY || '',
   baseURL: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
-  model: 'glm-4-flash', // 使用 GLM-4-Flash 更快更便宜
+  model: 'glm-4-plus', // 使用 GLM-4-Plus 最佳质量翻译
 }
 
 /**

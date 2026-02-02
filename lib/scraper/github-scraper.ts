@@ -101,17 +101,25 @@ export async function scrapeRepository(
     // 自动翻译为中文
     let nameZh: string | null = null
     let descriptionZh: string | null = null
+    let skillMdContentZh: string | null = null
+    let readmeContentZh: string | null = null
 
     try {
       console.log(`  🌐 正在翻译 ${parsedSkill.metadata.name}...`)
       const translations = await translateSkillData({
         name: parsedSkill.metadata.name,
         description: parsedSkill.metadata.description,
+        skillMdContent: finalSkillMdContent,
+        readmeContent: readme,
       })
       nameZh = translations.nameZh
       descriptionZh = translations.descriptionZh
+      skillMdContentZh = translations.skillMdContentZh || null
+      readmeContentZh = translations.readmeContentZh || null
       if (nameZh) console.log(`    ✓ 名称: ${nameZh}`)
       if (descriptionZh) console.log(`    ✓ 描述已翻译`)
+      if (skillMdContentZh) console.log(`    ✓ SKILL.md 已翻译`)
+      if (readmeContentZh) console.log(`    ✓ README 已翻译`)
     } catch (error) {
       // 翻译失败不影响主流程
       console.warn(`  ⚠ 翻译失败: ${error instanceof Error ? error.message : String(error)}`)
@@ -135,7 +143,9 @@ export async function scrapeRepository(
       openIssues: repoData.open_issues_count,
       lastCommit: new Date(repoData.pushed_at),
       skillMdContent: finalSkillMdContent,
+      skillMdContentZh,
       readmeContent: readme,
+      readmeContentZh,
       marketplaceJson,
       installCommand,
       isOfficial: owner === 'anthropics',
@@ -258,17 +268,22 @@ export async function scrapeMultiSkillRepository(
         // 自动翻译为中文
         let nameZh: string | null = null
         let descriptionZh: string | null = null
+        let skillMdContentZh: string | null = null
 
         try {
           console.log(`  🌐 正在翻译 ${parsedSkill.metadata.name}...`)
           const translations = await translateSkillData({
             name: parsedSkill.metadata.name,
             description: parsedSkill.metadata.description,
+            skillMdContent,
+            readmeContent: readme,
           })
           nameZh = translations.nameZh
           descriptionZh = translations.descriptionZh
+          skillMdContentZh = translations.skillMdContentZh || null
           if (nameZh) console.log(`    ✓ 名称: ${nameZh}`)
           if (descriptionZh) console.log(`    ✓ 描述已翻译`)
+          if (skillMdContentZh) console.log(`    ✓ SKILL.md 已翻译`)
         } catch (error) {
           // 翻译失败不影响主流程
           console.warn(`  ⚠ 翻译失败: ${error instanceof Error ? error.message : String(error)}`)
@@ -297,7 +312,9 @@ export async function scrapeMultiSkillRepository(
           openIssues: repoData.open_issues_count,
           lastCommit: new Date(repoData.pushed_at),
           skillMdContent,
+          skillMdContentZh,
           readmeContent: readme, // 使用仓库的 README
+          readmeContentZh: null, // README 翻译在循环外处理
           marketplaceJson,
           installCommand,
           isOfficial: owner === 'anthropics',

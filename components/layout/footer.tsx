@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Github, Heart } from 'lucide-react'
+import { VersionInfo } from './version-info'
 
 // 从环境变量获取 GitHub 组织，如果没有配置则使用默认值
 const GITHUB_ORG = process.env.NEXT_PUBLIC_GITHUB_ORG || 'your-org'
@@ -106,9 +107,12 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground">
-          <p>
-            Made with <Heart className="h-4 w-4 inline text-red-500" /> by GLM Skills Hub team
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center gap-2">
+            <p>
+              Made with <Heart className="h-4 w-4 inline text-red-500" /> by GLM Skills Hub team
+            </p>
+            <VersionInfo />
+          </div>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
             <a
               href={GITHUB_REPO_URL}

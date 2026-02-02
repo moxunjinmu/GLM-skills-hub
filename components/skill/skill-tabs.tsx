@@ -12,7 +12,9 @@ interface SkillTabsProps {
     description: string
     descriptionZh: string | null
     skillMdContent: string | null
+    skillMdContentZh: string | null
     readmeContent: string | null
+    readmeContentZh: string | null
     installCommand: string | null
     repository: string
     lastCommit: Date | null
@@ -73,11 +75,16 @@ export function SkillTabs({ skill }: SkillTabsProps) {
           </p>
         </div>
 
-        {skill.readmeContent && (
+        {(skill.readmeContentZh || skill.readmeContent) && (
           <div>
             <h3 className="text-xl font-semibold mb-3">详细说明</h3>
             <div className="bg-muted/50 border rounded-lg p-6">
-              {renderMarkdown(skill.readmeContent)}
+              {renderMarkdown(skill.readmeContentZh || skill.readmeContent)}
+              {!skill.readmeContentZh && (
+                <p className="text-xs text-muted-foreground mt-4 italic">
+                  英文原文 • 中文翻译即将上线
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -120,11 +127,16 @@ export function SkillTabs({ skill }: SkillTabsProps) {
           </p>
         </div>
 
-        {skill.skillMdContent && (
+        {(skill.skillMdContentZh || skill.skillMdContent) && (
           <div>
             <h2 className="text-2xl font-bold mb-4">使用说明</h2>
             <div className="bg-muted/30 border rounded-lg p-6">
-              {renderMarkdown(skill.skillMdContent)}
+              {renderMarkdown(skill.skillMdContentZh || skill.skillMdContent)}
+              {!skill.skillMdContentZh && (
+                <p className="text-xs text-muted-foreground mt-4 italic">
+                  英文原文 • 中文翻译即将上线
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -175,11 +187,11 @@ export function SkillTabs({ skill }: SkillTabsProps) {
           </div>
         </div>
 
-        {skill.skillMdContent && (
+        {(skill.skillMdContentZh || skill.skillMdContent) && (
           <div>
             <h2 className="text-2xl font-bold mb-4">SKILL.md 内容</h2>
             <div className="bg-muted border rounded-lg p-4 overflow-x-auto">
-              <pre className="text-sm font-mono">{skill.skillMdContent}</pre>
+              <pre className="text-sm font-mono">{skill.skillMdContentZh || skill.skillMdContent}</pre>
             </div>
           </div>
         )}

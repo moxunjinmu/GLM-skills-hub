@@ -48,10 +48,12 @@ model Skill {
   ratingCount     Int      @default(0)
 
   // 安装信息
-  installCommand  String?
-  skillMdContent  String?  @db.Text
-  readmeContent   String?  @db.Text
-  marketplaceJson Json?
+  installCommand   String?  @db.Text
+  skillMdContent   String?  @db.Text
+  skillMdContentZh String?  @db.Text // SKILL.md 中文内容
+  readmeContent    String?  @db.Text
+  readmeContentZh  String?  @db.Text // README 中文内容
+  marketplaceJson  Json?
 
   // 搜索优化：预存储的嵌入向量（使用 Json 存储数组）
   embedding       Json?    // 嵌入向量数组

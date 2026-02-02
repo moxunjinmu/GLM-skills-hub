@@ -1,7 +1,7 @@
 # GLM Skills Hub - 产品需求文档 (PRD)
 
-> **版本**: v1.0.0
-> **更新时间**: 2026-01-29
+> **版本**: v1.1.0
+> **更新时间**: 2026-02-02
 > **项目代号**: GLM-skills-hub
 
 ---
@@ -144,21 +144,54 @@ React, Vue, Next.js, Nuxt, Python, Go, Rust, TypeScript, JavaScript
 #### 5.1 翻译内容
 - Skill 名称（保留英文原名，添加中文译名）
 - Skill 描述
+- SKILL.md 内容（技能文档）
+- README 内容（项目说明）
 - 使用说明
 - 参数说明
 - 示例代码注释
 - 错误提示信息
 
 #### 5.2 翻译方式
-- **AI翻译**：使用大模型批量翻译初稿
+- **AI 翻译**：使用智谱清言 API 批量翻译初稿
+  - 爬取技能时自动调用翻译服务
+  - 支持长文本翻译（SKILL.md、README）
+  - 保留 Markdown 格式和代码块
 - **人工校对**：社区贡献者审核优化
 - **用户贡献**：开放翻译贡献入口
+- **手动同步**：提供命令行工具批量翻译现有内容
 
 #### 5.3 翻译质量
 - 专业术语对照表
 - 翻译记忆库
 - 质量评分系统
 - 优秀译者排行
+
+#### 5.4 翻译工具
+```bash
+# 批量同步翻译所有技能
+npm run sync:translations
+
+# 只翻译前 10 个技能
+npm run sync:translations -- --limit 10
+
+# 只翻译指定技能
+npm run sync:translations -- --skill <skill-id>
+
+# 强制重新翻译
+npm run sync:translations -- --force
+```
+
+#### 5.5 数据库字段
+```prisma
+model Skill {
+  // ...
+  skillMdContent   String?  @db.Text
+  skillMdContentZh String?  @db.Text // SKILL.md 中文内容
+  readmeContent    String?  @db.Text
+  readmeContentZh  String?  @db.Text // README 中文内容
+  // ...
+}
+```
 
 ---
 
@@ -502,7 +535,9 @@ enum TranslationStatus {
 - [ ] 用户认证（GitHub OAuth）
 
 ### Phase 4: 中文本地化（Week 7-8）
-- [ ] AI 翻译集成
+- [x] AI 翻译集成
+- [x] 爬取时自动翻译
+- [x] 手动同步翻译脚本
 - [ ] 翻译编辑界面
 - [ ] 社区贡献系统
 - [ ] 翻译审核流程
@@ -570,5 +605,11 @@ enum TranslationStatus {
 
 ---
 
-**文档状态**: ✅ 已确认，开始实施
-**下一步**: 安装依赖，启动开发服务器
+**文档状态**: ✅ 正在实施
+**更新内容**:
+- v1.1.0 (2026-02-02): 完成技能自动翻译功能
+  - 新增数据库字段：skillMdContentZh、readmeContentZh
+  - 爬取时自动调用智谱清言 API 翻译
+  - 新增手动同步翻译脚本 `npm run sync:translations`
+
+**下一步**: 测试翻译功能，同步现有技能翻译

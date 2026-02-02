@@ -29,7 +29,9 @@ export interface Skill {
   ratingCount: number
   installCommand: string | null
   skillMdContent: string | null
+  skillMdContentZh: string | null
   readmeContent: string | null
+  readmeContentZh: string | null
   marketplaceJson: Record<string, unknown> | null
   isOfficial: boolean
   isVerified: boolean
@@ -179,7 +181,9 @@ export interface SearchResult {
   ratingCount: number
   installCommand: string | null
   skillMdContent: string | null
+  skillMdContentZh: string | null
   readmeContent: string | null
+  readmeContentZh: string | null
   marketplaceJson: Record<string, unknown> | null
   isOfficial: boolean
   isVerified: boolean

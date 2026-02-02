@@ -1,0 +1,27 @@
+{
+  "name": "GLM Skills Hub",
+  "version": "1.1.0",
+  "updateDate": "2026-02-02",
+  "changelog": [
+    {
+      "version": "1.1.0",
+      "date": "2026-02-02",
+      "features": [
+        "新增数据库字段：skillMdContentZh、readmeContentZh",
+        "爬取时自动调用智谱清言 API 翻译",
+        "新增手动同步翻译脚本 npm run sync:translations",
+        "技能详情页支持显示中文内容"
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-01-29",
+      "features": [
+        "项目初始化",
+        "基础页面布局",
+        "数据库模型设计",
+        "GitHub 爬虫集成"
+      ]
+    }
+  ]
+}
